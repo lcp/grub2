@@ -632,7 +632,7 @@ _asn1_ltostr (int64_t v, char str[LTOSTR_MAX_SIZE])
   count = 0;
   do
     {
-      d = val / 10;
+      d = grub_divmod64(val, 10, NULL);
       r = val - d * 10;
       temp[start + count] = '0' + (char) r;
       count++;
