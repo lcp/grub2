@@ -36,7 +36,7 @@ _asn1_str_cat (char *dest, size_t dest_tot_size, const char *src)
 
   if (dest_tot_size - dest_size > str_size)
     {
-      strcat (dest, src);
+      strcpy (dest + dest_size, src);
     }
   else
     {
