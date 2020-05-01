@@ -118,7 +118,7 @@ _asn1_convert_integer (const unsigned char *value, unsigned char *value_out,
 	value_out[k2 - k] = val[k2];
     }
 
-#if 0
+#if 0 /* GRUB SKIPPED IMPORTING */
   printf ("_asn1_convert_integer: valueIn=%s, lenOut=%d", value, *len);
   for (k = 0; k < SIZEOF_UNSIGNED_LONG_INT; k++)
     printf (", vOut[%d]=%d", k, value_out[k]);
@@ -191,7 +191,7 @@ _asn1_append_sequence_set (asn1_node node, struct node_tail_cache_st *pcache)
   return ASN1_SUCCESS;
 }
 
-
+#if 0
 /**
  * asn1_write_value:
  * @node_root: pointer to a structure
@@ -646,7 +646,7 @@ asn1_write_value (asn1_node node_root, const char *name,
 
   return ASN1_SUCCESS;
 }
-
+#endif
 
 #define PUT_VALUE( ptr, ptr_size, data, data_size) \
 	*len = data_size; \
