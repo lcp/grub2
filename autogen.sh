@@ -51,6 +51,22 @@ for x in mpi-asm-defs.h mpih-add1.c mpih-sub1.c mpih-mul1.c mpih-mul2.c mpih-mul
     cp grub-core/lib/libgcrypt-grub/mpi/generic/"$x" grub-core/lib/libgcrypt-grub/mpi/"$x"
 done
 
+echo "Importing libtasn1..."
+if [ -d grub-core/lib/libtasn1-grub ]; then
+  rm -rf grub-core/lib/libtasn1-grub
+fi
+
+mkdir -p grub-core/lib/libtasn1-grub/lib
+cp grub-core/lib/libtasn1/lib/*.[ch] grub-core/lib/libtasn1-grub/lib
+cp grub-core/lib/libtasn1/libtasn1.h grub-core/lib/libtasn1-grub/
+
+for patch in \
+	0001-libtasn1-disable-code-not-needed-in-grub.patch \
+	0002-libtasn1-changes-for-grub-compatibility.patch \
+	0003-libtasn1-fix-the-potential-buffer-overrun.patch ; do
+  patch -p1 -i grub-core/lib/libtasn1-patches/$patch
+done
+
 echo "Generating Automake input..."
 
 # Automake doesn't like including files from a path outside the project.
