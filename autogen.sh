@@ -60,12 +60,20 @@ mkdir -p grub-core/lib/libtasn1-grub/lib
 cp grub-core/lib/libtasn1/lib/*.[ch] grub-core/lib/libtasn1-grub/lib
 cp grub-core/lib/libtasn1/libtasn1.h grub-core/lib/libtasn1-grub/
 
+if [ -d grub-core/tests/asn1/tests ]; then
+  rm -rf grub-core/tests/asn1/tests
+fi
+
+mkdir grub-core/tests/asn1/tests
+cp grub-core/lib/libtasn1/tests/*.[ch] grub-core/tests/asn1/tests
+
 for patch in \
 	0001-libtasn1-disable-code-not-needed-in-grub.patch \
 	0002-libtasn1-use-bound-checked-_asn1_str_cat.patch \
 	0003-libtasn1-adjust-the-header-paths-in-libtasn1.h.patch \
 	0004-libtasn1-Use-grub_divmod64-for-division.patch \
-	0005-libtasn1-fix-the-potential-buffer-overrun.patch ; do
+	0005-libtasn1-fix-the-potential-buffer-overrun.patch \
+	0006-asn1_test-changes-for-grub-compatibility.patch ; do
   patch -p1 -i grub-core/lib/libtasn1-patches/$patch
 done
 
