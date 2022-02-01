@@ -76,6 +76,7 @@ grub_TRANSFORM([grub-mkpasswd-pbkdf2])
 grub_TRANSFORM([grub-mkrelpath])
 grub_TRANSFORM([grub-mkrescue])
 grub_TRANSFORM([grub-probe])
+grub_TRANSFORM([grub-protect])
 grub_TRANSFORM([grub-reboot])
 grub_TRANSFORM([grub-script-check])
 grub_TRANSFORM([grub-set-default])
@@ -1991,6 +1992,14 @@ fi
 
 AC_SUBST([LIBZFS])
 AC_SUBST([LIBNVPAIR])
+
+LIBTASN1=
+if test x"$platform" = xefi; then
+  AC_CHECK_LIB([tasn1], [asn1_write_value], [],
+               [AC_MSG_ERROR([Your platform requires libtasn1])])
+  LIBTASN1="-ltasn1"
+fi
+AC_SUBST([LIBTASN1])
 
 LIBS=""
 
