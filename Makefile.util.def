@@ -208,6 +208,28 @@ program = {
 };
 
 program = {
+  name = grub-protect;
+
+  common = grub-core/osdep/init.c;
+  common = grub-core/tpm2/args.c;
+  common = grub-core/tpm2/buffer.c;
+  common = grub-core/tpm2/mu.c;
+  common = grub-core/tpm2/tpm2.c;
+  common = grub-core/tpm2/tpm2key_asn1_tab.c;
+  common = util/grub-protect.c;
+  common = util/probe.c;
+
+  ldadd = libgrubmods.a;
+  ldadd = libgrubgcry.a;
+  ldadd = libgrubkern.a;
+  ldadd = grub-core/lib/gnulib/libgnu.a;
+  ldadd = '$(LIBTASN1)';
+  ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
+
+  enable = efi;
+};
+
+program = {
   name = grub-mkrelpath;
   mansection = 1;
 
