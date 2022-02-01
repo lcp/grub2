@@ -2519,6 +2519,17 @@ module = {
 };
 
 module = {
+  name = tpm2;
+  common = tpm2/args.c;
+  common = tpm2/buffer.c;
+  common = tpm2/module.c;
+  common = tpm2/mu.c;
+  common = tpm2/tpm2.c;
+  efi = tpm2/tcg2.c;
+  enable = efi;
+};
+
+module = {
   name = tr;
   common = commands/tr.c;
 };
