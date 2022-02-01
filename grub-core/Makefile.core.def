@@ -1279,6 +1279,11 @@ module = {
 };
 
 module = {
+  name = key_protector;
+  common = disk/key_protector.c;
+};
+
+module = {
   name = scsi;
   common = disk/scsi.c;
 };
