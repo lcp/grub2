@@ -144,6 +144,7 @@ kernel = {
   common = kern/misc.c;
   common = kern/parser.c;
   common = kern/partition.c;
+  common = kern/protectors.c;
   common = kern/rescue_parser.c;
   common = kern/rescue_reader.c;
   common = kern/term.c;
