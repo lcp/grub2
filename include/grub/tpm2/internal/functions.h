@@ -22,12 +22,12 @@
 #include <grub/tpm2/internal/structs.h>
 
 TPM_RC
-TPM2_CreatePrimary (TPMI_RH_HIERARCHY primaryHandle,
+TPM2_CreatePrimary (const TPMI_RH_HIERARCHY primaryHandle,
 		    const TPMS_AUTH_COMMAND *authCommand,
-		    TPM2B_SENSITIVE_CREATE *inSensitive,
-		    TPM2B_PUBLIC *inPublic,
-		    TPM2B_DATA *outsideInfo,
-		    TPML_PCR_SELECTION *creationPCR,
+		    const TPM2B_SENSITIVE_CREATE *inSensitive,
+		    const TPM2B_PUBLIC *inPublic,
+		    const TPM2B_DATA *outsideInfo,
+		    const TPML_PCR_SELECTION *creationPCR,
 		    TPM_HANDLE *objectHandle,
 		    TPM2B_PUBLIC *outPublic,
 		    TPM2B_CREATION_DATA *creationData,
@@ -37,69 +37,69 @@ TPM2_CreatePrimary (TPMI_RH_HIERARCHY primaryHandle,
 		    TPMS_AUTH_RESPONSE *authResponse);
 
 TPM_RC
-TPM2_StartAuthSession (TPMI_DH_OBJECT tpmKey,
-		       TPMI_DH_ENTITY bind,
+TPM2_StartAuthSession (const TPMI_DH_OBJECT tpmKey,
+		       const TPMI_DH_ENTITY bind,
 		       const TPMS_AUTH_COMMAND *authCommand,
-		       TPM2B_NONCE *nonceCaller,
-		       TPM2B_ENCRYPTED_SECRET *encryptedSalt,
-		       TPM_SE sessionType,
-		       TPMT_SYM_DEF *symmetric,
-		       TPMI_ALG_HASH authHash,
+		       const TPM2B_NONCE *nonceCaller,
+		       const TPM2B_ENCRYPTED_SECRET *encryptedSalt,
+		       const TPM_SE sessionType,
+		       const TPMT_SYM_DEF *symmetric,
+		       const TPMI_ALG_HASH authHash,
 		       TPMI_SH_AUTH_SESSION *sessionHandle,
 		       TPM2B_NONCE *nonceTpm,
 		       TPMS_AUTH_RESPONSE *authResponse);
 
 TPM_RC
-TPM2_PolicyPCR (TPMI_SH_POLICY policySession,
+TPM2_PolicyPCR (const TPMI_SH_POLICY policySession,
 		const TPMS_AUTH_COMMAND *authCommand,
-		TPM2B_DIGEST *pcrDigest,
-		TPML_PCR_SELECTION *pcrs,
+		const TPM2B_DIGEST *pcrDigest,
+		const TPML_PCR_SELECTION *pcrs,
 		TPMS_AUTH_RESPONSE *authResponse);
 
 TPM_RC
-TPM2_ReadPublic (TPMI_DH_OBJECT objectHandle,
+TPM2_ReadPublic (const TPMI_DH_OBJECT objectHandle,
 		 const TPMS_AUTH_COMMAND* authCommand,
 		 TPM2B_PUBLIC *outPublic);
 
 TPM_RC
-TPM2_Load (TPMI_DH_OBJECT parent_handle,
-	   TPMS_AUTH_COMMAND const *authCommand,
-	   TPM2B_PRIVATE *inPrivate,
-	   TPM2B_PUBLIC *inPublic,
+TPM2_Load (const TPMI_DH_OBJECT parent_handle,
+	   const TPMS_AUTH_COMMAND *authCommand,
+	   const TPM2B_PRIVATE *inPrivate,
+	   const TPM2B_PUBLIC *inPublic,
 	   TPM_HANDLE *objectHandle,
 	   TPM2B_NAME *name,
 	   TPMS_AUTH_RESPONSE *authResponse);
 
 TPM_RC
-TPM2_Unseal (TPMI_DH_OBJECT item_handle,
+TPM2_Unseal (const TPMI_DH_OBJECT item_handle,
 	     const TPMS_AUTH_COMMAND *authCommand,
 	     TPM2B_SENSITIVE_DATA *outData,
 	     TPMS_AUTH_RESPONSE *authResponse);
 
 TPM_RC
-TPM2_FlushContext (TPMI_DH_CONTEXT handle);
+TPM2_FlushContext (const TPMI_DH_CONTEXT handle);
 
 TPM_RC
 TPM2_PCR_Read (const TPMS_AUTH_COMMAND *authCommand,
-	       TPML_PCR_SELECTION  *pcrSelectionIn,
+	       const TPML_PCR_SELECTION *pcrSelectionIn,
 	       grub_uint32_t *pcrUpdateCounter,
 	       TPML_PCR_SELECTION *pcrSelectionOut,
 	       TPML_DIGEST *pcrValues,
 	       TPMS_AUTH_RESPONSE *authResponse);
 
 TPM_RC
-TPM2_PolicyGetDigest (TPMI_SH_POLICY policySession,
+TPM2_PolicyGetDigest (const TPMI_SH_POLICY policySession,
 		      const TPMS_AUTH_COMMAND *authCommand,
 		      TPM2B_DIGEST *policyDigest,
 		      TPMS_AUTH_RESPONSE *authResponse);
 
 TPM_RC
-TPM2_Create (TPMI_DH_OBJECT parentHandle,
+TPM2_Create (const TPMI_DH_OBJECT parentHandle,
 	     const TPMS_AUTH_COMMAND *authCommand,
-	     TPM2B_SENSITIVE_CREATE *inSensitive,
-	     TPM2B_PUBLIC *inPublic,
-	     TPM2B_DATA *outsideInfo,
-	     TPML_PCR_SELECTION *creationPCR,
+	     const TPM2B_SENSITIVE_CREATE *inSensitive,
+	     const TPM2B_PUBLIC *inPublic,
+	     const TPM2B_DATA *outsideInfo,
+	     const TPML_PCR_SELECTION *creationPCR,
 	     TPM2B_PRIVATE *outPrivate,
 	     TPM2B_PUBLIC *outPublic,
 	     TPM2B_CREATION_DATA *creationData,
@@ -108,10 +108,10 @@ TPM2_Create (TPMI_DH_OBJECT parentHandle,
 	     TPMS_AUTH_RESPONSE *authResponse);
 
 TPM_RC
-TPM2_EvictControl (TPMI_RH_PROVISION auth,
-		   TPMI_DH_OBJECT objectHandle,
+TPM2_EvictControl (const TPMI_RH_PROVISION auth,
+		   const TPMI_DH_OBJECT objectHandle,
 		   const TPMS_AUTH_COMMAND *authCommand,
-		   TPMI_DH_PERSISTENT persistentHandle,
+		   const TPMI_DH_PERSISTENT persistentHandle,
 		   TPMS_AUTH_RESPONSE *authResponse);
 
 #endif /* ! GRUB_TPM2_INTERNAL_FUNCTIONS_HEADER */

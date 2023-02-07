@@ -49,7 +49,7 @@ grub_tpm2_mu_TPMS_AUTH_COMMAND_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPM2B_Marshal (grub_tpm2_buffer_t buffer,
-			    grub_uint16_t size,
+			    const grub_uint16_t size,
 			    const grub_uint8_t* b)
 {
   grub_tpm2_buffer_pack_u16 (buffer, size);
@@ -60,8 +60,8 @@ grub_tpm2_mu_TPM2B_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMU_SYM_KEY_BITS_Marshal (grub_tpm2_buffer_t buffer,
-					TPMI_ALG_SYM_OBJECT algorithm,
-					TPMU_SYM_KEY_BITS *p)
+					const TPMI_ALG_SYM_OBJECT algorithm,
+					const TPMU_SYM_KEY_BITS *p)
 {
   switch (algorithm)
     {
@@ -78,8 +78,8 @@ grub_tpm2_mu_TPMU_SYM_KEY_BITS_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMU_SYM_MODE_Marshal (grub_tpm2_buffer_t buffer,
-				    TPMI_ALG_SYM_OBJECT algorithm,
-				    TPMU_SYM_MODE *p)
+				    const TPMI_ALG_SYM_OBJECT algorithm,
+				    const TPMU_SYM_MODE *p)
 {
   switch (algorithm)
     {
@@ -96,7 +96,7 @@ grub_tpm2_mu_TPMU_SYM_MODE_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMT_SYM_DEF_Marshal (grub_tpm2_buffer_t buffer,
-				   TPMT_SYM_DEF *p)
+				   const TPMT_SYM_DEF *p)
 {
   grub_tpm2_buffer_pack_u16 (buffer, p->algorithm);
   grub_tpm2_mu_TPMU_SYM_KEY_BITS_Marshal (buffer, p->algorithm, &p->keyBits);
@@ -134,7 +134,7 @@ grub_tpm2_mu_TPMA_OBJECT_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMS_SCHEME_XOR_Marshal (grub_tpm2_buffer_t buffer,
-				      TPMS_SCHEME_XOR *p)
+				      const TPMS_SCHEME_XOR *p)
 {
   grub_tpm2_buffer_pack_u16 (buffer, p->hashAlg);
   grub_tpm2_buffer_pack_u16 (buffer, p->kdf);
@@ -142,15 +142,15 @@ grub_tpm2_mu_TPMS_SCHEME_XOR_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMS_SCHEME_HMAC_Marshal (grub_tpm2_buffer_t buffer,
-				       TPMS_SCHEME_HMAC *p)
+				       const TPMS_SCHEME_HMAC *p)
 {
   grub_tpm2_buffer_pack_u16 (buffer, p->hashAlg);
 }
 
 void
 grub_tpm2_mu_TPMU_SCHEME_KEYEDHASH_Marshal (grub_tpm2_buffer_t buffer,
-					    TPMI_ALG_KEYEDHASH_SCHEME scheme,
-					    TPMU_SCHEME_KEYEDHASH *p)
+					    const TPMI_ALG_KEYEDHASH_SCHEME scheme,
+					    const TPMU_SCHEME_KEYEDHASH *p)
 {
   switch (scheme)
     {
@@ -170,7 +170,7 @@ grub_tpm2_mu_TPMU_SCHEME_KEYEDHASH_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMT_KEYEDHASH_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
-					    TPMT_KEYEDHASH_SCHEME *p)
+					    const TPMT_KEYEDHASH_SCHEME *p)
 {
   grub_tpm2_buffer_pack_u16 (buffer, p->scheme);
   grub_tpm2_mu_TPMU_SCHEME_KEYEDHASH_Marshal (buffer, p->scheme, &p->details);
@@ -178,14 +178,14 @@ grub_tpm2_mu_TPMT_KEYEDHASH_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMS_KEYEDHASH_PARMS_Marshal (grub_tpm2_buffer_t buffer,
-					   TPMS_KEYEDHASH_PARMS *p)
+					   const TPMS_KEYEDHASH_PARMS *p)
 {
   grub_tpm2_mu_TPMT_KEYEDHASH_SCHEME_Marshal (buffer, &p->scheme);
 }
 
 void
 grub_tpm2_mu_TPMT_SYM_DEF_OBJECT_Marshal (grub_tpm2_buffer_t buffer,
-					  TPMT_SYM_DEF_OBJECT *p)
+					  const TPMT_SYM_DEF_OBJECT *p)
 {
   grub_tpm2_buffer_pack_u16 (buffer, p->algorithm);
   grub_tpm2_mu_TPMU_SYM_KEY_BITS_Marshal (buffer, p->algorithm, &p->keyBits);
@@ -194,8 +194,8 @@ grub_tpm2_mu_TPMT_SYM_DEF_OBJECT_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMU_ASYM_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
-				       TPMI_ALG_RSA_DECRYPT scheme,
-				       TPMU_ASYM_SCHEME *p __attribute__ ((unused)))
+				       const TPMI_ALG_RSA_DECRYPT scheme,
+				       const TPMU_ASYM_SCHEME *p __attribute__ ((unused)))
 {
   switch (scheme)
     {
@@ -210,7 +210,7 @@ grub_tpm2_mu_TPMU_ASYM_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMT_RSA_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
-				      TPMT_RSA_SCHEME *p)
+				      const TPMT_RSA_SCHEME *p)
 {
   grub_tpm2_buffer_pack_u16 (buffer, p->scheme);
   grub_tpm2_mu_TPMU_ASYM_SCHEME_Marshal (buffer, p->scheme, &p->details);
@@ -218,7 +218,7 @@ grub_tpm2_mu_TPMT_RSA_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMS_RSA_PARMS_Marshal (grub_tpm2_buffer_t buffer,
-				     TPMS_RSA_PARMS *p)
+				     const TPMS_RSA_PARMS *p)
 {
   grub_tpm2_mu_TPMT_SYM_DEF_OBJECT_Marshal (buffer, &p->symmetric);
   grub_tpm2_mu_TPMT_RSA_SCHEME_Marshal (buffer, &p->scheme);
@@ -228,14 +228,14 @@ grub_tpm2_mu_TPMS_RSA_PARMS_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMS_SYMCIPHER_PARMS_Marshal (grub_tpm2_buffer_t buffer,
-					   TPMS_SYMCIPHER_PARMS *p)
+					   const TPMS_SYMCIPHER_PARMS *p)
 {
   grub_tpm2_mu_TPMT_SYM_DEF_OBJECT_Marshal (buffer, &p->sym);
 }
 
 void
 grub_tpm2_mu_TPMT_ECC_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
-				      TPMT_ECC_SCHEME *p)
+				      const TPMT_ECC_SCHEME *p)
 {
   grub_tpm2_buffer_pack_u16 (buffer, p->scheme);
   grub_tpm2_mu_TPMU_ASYM_SCHEME_Marshal (buffer, p->scheme, &p->details);
@@ -243,8 +243,8 @@ grub_tpm2_mu_TPMT_ECC_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMU_KDF_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
-				      TPMI_ALG_KDF scheme,
-				      TPMU_KDF_SCHEME *p)
+				      const TPMI_ALG_KDF scheme,
+				      const TPMU_KDF_SCHEME *p)
 {
   switch (scheme)
     {
@@ -270,7 +270,7 @@ grub_tpm2_mu_TPMU_KDF_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMT_KDF_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
-				      TPMT_KDF_SCHEME *p)
+				      const TPMT_KDF_SCHEME *p)
 {
   grub_tpm2_buffer_pack_u16 (buffer, p->scheme);
   grub_tpm2_mu_TPMU_KDF_SCHEME_Marshal (buffer, p->scheme, &p->details);
@@ -278,7 +278,7 @@ grub_tpm2_mu_TPMT_KDF_SCHEME_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMS_ECC_PARMS_Marshal (grub_tpm2_buffer_t buffer,
-				     TPMS_ECC_PARMS *p)
+				     const TPMS_ECC_PARMS *p)
 {
   grub_tpm2_mu_TPMT_SYM_DEF_OBJECT_Marshal (buffer, &p->symmetric);
   grub_tpm2_mu_TPMT_ECC_SCHEME_Marshal (buffer, &p->scheme);
@@ -288,8 +288,8 @@ grub_tpm2_mu_TPMS_ECC_PARMS_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMU_PUBLIC_PARMS_Marshal (grub_tpm2_buffer_t buffer,
-					grub_uint32_t type,
-					TPMU_PUBLIC_PARMS *p)
+					const grub_uint32_t type,
+					const TPMU_PUBLIC_PARMS *p)
 {
   switch (type)
     {
@@ -313,7 +313,7 @@ grub_tpm2_mu_TPMU_PUBLIC_PARMS_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMS_ECC_POINT_Marshal (grub_tpm2_buffer_t buffer,
-				     TPMS_ECC_POINT *p)
+				     const TPMS_ECC_POINT *p)
 {
   grub_tpm2_mu_TPM2B_Marshal (buffer, p->x.size, p->x.buffer);
   grub_tpm2_mu_TPM2B_Marshal (buffer, p->y.size, p->y.buffer);
@@ -321,8 +321,8 @@ grub_tpm2_mu_TPMS_ECC_POINT_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMU_PUBLIC_ID_Marshal (grub_tpm2_buffer_t buffer,
-				     TPMI_ALG_PUBLIC type,
-				     TPMU_PUBLIC_ID *p)
+				     const TPMI_ALG_PUBLIC type,
+				     const TPMU_PUBLIC_ID *p)
 {
   switch(type)
     {
@@ -344,7 +344,7 @@ grub_tpm2_mu_TPMU_PUBLIC_ID_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMT_PUBLIC_Marshal (grub_tpm2_buffer_t buffer,
-				  TPMT_PUBLIC *p)
+				  const TPMT_PUBLIC *p)
 {
   grub_tpm2_buffer_pack_u16 (buffer, p->type);
   grub_tpm2_buffer_pack_u16 (buffer, p->nameAlg);
@@ -356,7 +356,7 @@ grub_tpm2_mu_TPMT_PUBLIC_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPM2B_PUBLIC_Marshal (grub_tpm2_buffer_t buffer,
-				   TPM2B_PUBLIC *p)
+				   const TPM2B_PUBLIC *p)
 {
   grub_uint32_t start;
   grub_uint16_t size;
@@ -377,7 +377,7 @@ grub_tpm2_mu_TPM2B_PUBLIC_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPMS_SENSITIVE_CREATE_Marshal (grub_tpm2_buffer_t buffer,
-					    TPMS_SENSITIVE_CREATE *p)
+					    const TPMS_SENSITIVE_CREATE *p)
 {
   grub_tpm2_mu_TPM2B_Marshal (buffer, p->userAuth.size, p->userAuth.buffer);
   grub_tpm2_mu_TPM2B_Marshal (buffer, p->data.size, p->data.buffer);
@@ -385,7 +385,7 @@ grub_tpm2_mu_TPMS_SENSITIVE_CREATE_Marshal (grub_tpm2_buffer_t buffer,
 
 void
 grub_tpm2_mu_TPM2B_SENSITIVE_CREATE_Marshal (grub_tpm2_buffer_t buffer,
-					     TPM2B_SENSITIVE_CREATE *sensitiveCreate)
+					     const TPM2B_SENSITIVE_CREATE *sensitiveCreate)
 {
   grub_uint32_t start;
   grub_uint16_t size;
