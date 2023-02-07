@@ -672,4 +672,90 @@ struct TPMT_TK_CREATION
 };
 typedef struct TPMT_TK_CREATION TPMT_TK_CREATION;
 
+/* TPMS_EMPTY Structure */
+struct TPMS_EMPTY {
+  grub_uint8_t empty[1]; /* a structure with no member */
+};
+typedef struct TPMS_EMPTY TPMS_EMPTY;
+
+/* TPMS_SIGNATURE_RSA Structure */
+struct TPMS_SIGNATURE_RSA {
+  TPMI_ALG_HASH hash;
+  TPM2B_PUBLIC_KEY_RSA sig;
+};
+typedef struct TPMS_SIGNATURE_RSA TPMS_SIGNATURE_RSA;
+
+/* Definition of Types for RSA Signature */
+typedef TPMS_SIGNATURE_RSA TPMS_SIGNATURE_RSASSA;
+typedef TPMS_SIGNATURE_RSA TPMS_SIGNATURE_RSAPSS;
+
+/* TPMS_SIGNATURE_ECC Structure */
+struct TPMS_SIGNATURE_ECC {
+  TPMI_ALG_HASH hash;
+  TPM2B_ECC_PARAMETER signatureR;
+  TPM2B_ECC_PARAMETER signatureS;
+};
+typedef struct TPMS_SIGNATURE_ECC TPMS_SIGNATURE_ECC;
+
+/* Definition of Types for ECC TPMS_SIGNATURE_ECC */
+typedef TPMS_SIGNATURE_ECC TPMS_SIGNATURE_ECDSA;
+typedef TPMS_SIGNATURE_ECC TPMS_SIGNATURE_ECDAA;
+typedef TPMS_SIGNATURE_ECC TPMS_SIGNATURE_SM2;
+typedef TPMS_SIGNATURE_ECC TPMS_SIGNATURE_ECSCHNORR;
+
+/* TPMU_SIGNATURE Structure */
+union TPMU_SIGNATURE {
+  TPMS_SIGNATURE_RSASSA rsassa;
+  TPMS_SIGNATURE_RSAPSS rsapss;
+  TPMS_SIGNATURE_ECDSA ecdsa;
+  TPMS_SIGNATURE_ECDAA ecdaa;
+  TPMS_SIGNATURE_SM2 sm2;
+  TPMS_SIGNATURE_ECSCHNORR ecschnorr;
+  TPMT_HA hmac;
+  TPMS_SCHEME_HASH any;
+  TPMS_EMPTY null;
+};
+typedef union TPMU_SIGNATURE TPMU_SIGNATURE;
+
+/* TPMT_SIGNATURE Structure */
+struct TPMT_SIGNATURE {
+  TPMI_ALG_SIG_SCHEME sigAlg;
+  TPMU_SIGNATURE signature;
+};
+typedef struct TPMT_SIGNATURE TPMT_SIGNATURE;
+
+static inline TPMI_ALG_HASH
+TPMT_SIGNATURE_get_hash_alg (TPMT_SIGNATURE *sig)
+{
+  switch (sig->sigAlg)
+    {
+    case TPM_ALG_RSASSA:
+      return sig->signature.rsassa.hash;
+    case TPM_ALG_RSAPSS:
+      return sig->signature.rsapss.hash;
+    case TPM_ALG_ECDSA:
+      return sig->signature.ecdsa.hash;
+    case TPM_ALG_ECDAA:
+      return sig->signature.ecdaa.hash;
+    case TPM_ALG_SM2:
+      return sig->signature.sm2.hash;
+    case TPM_ALG_ECSCHNORR:
+      return sig->signature.ecschnorr.hash;
+    case TPM_ALG_HMAC:
+      return sig->signature.hmac.hashAlg;
+    default:
+      break;
+    }
+
+  return TPM_ALG_NULL;
+}
+
+/* TPMT_TK_VERIFIED Structure */
+struct TPMT_TK_VERIFIED {
+  TPM_ST tag;
+  TPMI_RH_HIERARCHY hierarchy;
+  TPM2B_DIGEST digest;
+};
+typedef struct TPMT_TK_VERIFIED TPMT_TK_VERIFIED;
+
 #endif /* ! GRUB_TPM2_INTERNAL_STRUCTS_HEADER */
