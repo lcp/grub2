@@ -695,8 +695,8 @@ grub_protect_tpm2_get_srk (struct grub_protect_args *args, TPM_HANDLE *srk)
   /* Persist SRK */
   if (args->tpm2_persist)
     {
-      rc = TPM2_EvictControl (TPM_RH_OWNER, srkHandle, args->tpm2_srk,
-			      &authCommand, NULL);
+      rc = TPM2_EvictControl (TPM_RH_OWNER, srkHandle, &authCommand,
+			      args->tpm2_srk, NULL);
       if (rc == TPM_RC_SUCCESS)
 	{
 	  TPM2_FlushContext (srkHandle);
@@ -877,8 +877,8 @@ grub_protect_tpm2_remove (struct grub_protect_args *args)
   /* Evict SRK */
   authCommand.sessionHandle = TPM_RS_PW;
 
-  rc = TPM2_EvictControl (TPM_RH_OWNER, args->tpm2_srk, args->tpm2_srk,
-			  &authCommand, NULL);
+  rc = TPM2_EvictControl (TPM_RH_OWNER, args->tpm2_srk, &authCommand,
+			  args->tpm2_srk, NULL);
   if (rc != TPM_RC_SUCCESS)
     {
       fprintf (stderr,

@@ -662,8 +662,8 @@ TPM2_Create (TPMI_DH_OBJECT parentHandle,
 TPM_RC
 TPM2_EvictControl (TPMI_RH_PROVISION auth,
 		   TPMI_DH_OBJECT objectHandle,
-		   TPMI_DH_PERSISTENT persistentHandle,
 		   const TPMS_AUTH_COMMAND *authCommand,
+		   TPMI_DH_PERSISTENT persistentHandle,
 		   TPMS_AUTH_RESPONSE *authResponse)
 {
   struct grub_tpm2_buffer in;
