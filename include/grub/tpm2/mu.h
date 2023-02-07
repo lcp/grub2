@@ -147,6 +147,47 @@ grub_tpm2_mu_TPM2B_SENSITIVE_CREATE_Marshal (grub_tpm2_buffer_t buf,
 					     const TPM2B_SENSITIVE_CREATE *sensitiveCreate);
 
 void
+grub_tpm2_mu_TPMU_SENSITIVE_COMPOSITE_Marshal (grub_tpm2_buffer_t buf,
+                                               const TPMI_ALG_PUBLIC type,
+                                               const TPMU_SENSITIVE_COMPOSITE *p);
+void
+grub_tpm2_mu_TPMT_SENSITIVE_Marshal (grub_tpm2_buffer_t buf,
+                                     const TPMT_SENSITIVE *p);
+
+void
+grub_tpm2_mu_TPM2B_SENSITIVE_Marshal (grub_tpm2_buffer_t buf,
+                                      const TPM2B_SENSITIVE *p);
+
+void
+grub_tpm2_mu_TPMS_SIGNATURE_RSA_Marshal (grub_tpm2_buffer_t buf,
+                                         const TPMS_SIGNATURE_RSA *p);
+
+void
+grub_tpm2_mu_TPMS_SIGNATURE_ECC_Marshal (grub_tpm2_buffer_t buf,
+                                         const TPMS_SIGNATURE_ECC *p);
+
+void
+grub_tpm2_mu_TPMU_HA_Marshal (grub_tpm2_buffer_t buf,
+                              const TPMI_ALG_HASH hashAlg,
+                              const TPMU_HA *p);
+
+void
+grub_tpm2_mu_TPMT_HA_Marshal (grub_tpm2_buffer_t buf,
+                              const TPMT_HA *p);
+
+void
+grub_tpm2_mu_TPMU_SIGNATURE_Marshal (grub_tpm2_buffer_t buf,
+                                     const TPMI_ALG_SIG_SCHEME sigAlg,
+                                     const TPMU_SIGNATURE *p);
+
+void
+grub_tpm2_mu_TPMT_SIGNATURE_Marshal (grub_tpm2_buffer_t buf,
+                                     const TPMT_SIGNATURE *p);
+
+void
+grub_tpm2_mu_TPMT_TK_VERIFIED_Marshal (grub_tpm2_buffer_t buf,
+                                       const TPMT_TK_VERIFIED *p);
+void
 grub_tpm2_mu_TPM2B_Unmarshal (grub_tpm2_buffer_t buf,
 			      TPM2B* p);
 
@@ -278,6 +319,14 @@ grub_tpm2_mu_TPMT_TK_CREATION_Unmarshal (grub_tpm2_buffer_t buf,
 					 TPMT_TK_CREATION *p);
 
 void
+grub_tpm2_mu_TPMT_TK_HASHCHECK_Unmarshal (grub_tpm2_buffer_t buf,
+                                          TPMT_TK_HASHCHECK *p);
+
+void
+grub_tpm2_mu_TPMT_TK_VERIFIED_Unmarshal (grub_tpm2_buffer_t buf,
+                                         TPMT_TK_VERIFIED *p);
+
+void
 grub_tpm2_mu_TPMS_PCR_SELECTION_Unmarshal (grub_tpm2_buffer_t buf,
 					   TPMS_PCR_SELECTION* pcrSelection);
 
@@ -288,5 +337,31 @@ grub_tpm2_mu_TPML_PCR_SELECTION_Unmarshal (grub_tpm2_buffer_t buf,
 void
 grub_tpm2_mu_TPML_DIGEST_Unmarshal (grub_tpm2_buffer_t buf,
 				    TPML_DIGEST* digest);
+
+void
+grub_tpm2_mu_TPMS_SIGNATURE_RSA_Unmarshal (grub_tpm2_buffer_t buf,
+                                           TPMS_SIGNATURE_RSA *p);
+
+void
+grub_tpm2_mu_TPMS_SIGNATURE_ECC_Unmarshal (grub_tpm2_buffer_t buf,
+                                           TPMS_SIGNATURE_ECC *p);
+
+void
+grub_tpm2_mu_TPMU_HA_Unmarshal (grub_tpm2_buffer_t buf,
+                                TPMI_ALG_HASH hashAlg,
+                                TPMU_HA *p);
+
+void
+grub_tpm2_mu_TPMT_HA_Unmarshal (grub_tpm2_buffer_t buf,
+                                TPMT_HA *p);
+
+void
+grub_tpm2_mu_TPMU_SIGNATURE_Unmarshal (grub_tpm2_buffer_t buf,
+                                       TPMI_ALG_SIG_SCHEME sigAlg,
+                                       TPMU_SIGNATURE *p);
+
+void
+grub_tpm2_mu_TPMT_SIGNATURE_Unmarshal (grub_tpm2_buffer_t buf,
+                                       TPMT_SIGNATURE *p);
 
 #endif /* ! GRUB_TPM2_MU_HEADER */
