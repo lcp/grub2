@@ -127,6 +127,9 @@ TPM2_CreatePrimary (const TPMI_RH_HIERARCHY primaryHandle,
   TPM_RC responseCode;
   grub_uint32_t parameterSize;
 
+  if (!inSensitive || !inPublic || !outsideInfo || !creationPCR)
+    return TPM_RC_VALUE;
+
   if (!objectHandle)
     objectHandle = &objectHandleTmp;
   if (!outPublic)
@@ -210,6 +213,13 @@ TPM2_StartAuthSession (const TPMI_DH_OBJECT tpmKey,
   TPM_RC responseCode;
   grub_uint32_t param_size;
 
+  if (!nonceCaller || !symmetric)
+    return TPM_RC_VALUE;
+
+  if (tpmKey == TPM_RH_NULL &&
+      (encryptedSalt && encryptedSalt->size != 0))
+    return TPM_RC_VALUE;
+
   if (!sessionHandle)
     sessionHandle = &sessionHandleTmp;
   if (!nonceTpm)
@@ -271,6 +281,9 @@ TPM2_PolicyPCR (const TPMI_SH_POLICY policySessions,
   TPMI_ST_COMMAND_TAG tag = authCommand ? TPM_ST_SESSIONS : TPM_ST_NO_SESSIONS;
   TPM_RC responseCode;
   grub_uint32_t param_size;
+
+  if (!pcrs)
+    return TPM_RC_VALUE;
 
   if (!authResponse)
     authResponse = &authResponseTmp;
@@ -362,6 +375,9 @@ TPM2_Load (const TPMI_DH_OBJECT parent_handle,
   TPMI_ST_COMMAND_TAG tag = authCommand ? TPM_ST_SESSIONS : TPM_ST_NO_SESSIONS;
   TPM_RC responseCode;
   grub_uint32_t param_size;
+
+  if (!inPrivate || !inPublic)
+    return TPM_RC_VALUE;
 
   if (!objectHandle)
     objectHandle = &objectHandleTmp;
@@ -506,7 +522,7 @@ TPM2_PCR_Read (const TPMS_AUTH_COMMAND *authCommand,
   grub_uint32_t parameterSize;
 
   if (!pcrSelectionIn)
-    return TPM_RC_FAILURE;
+    return TPM_RC_VALUE;
 
   if (!pcrUpdateCounter)
     pcrUpdateCounter = &pcrUpdateCounterTmp;
@@ -624,6 +640,9 @@ TPM2_Create (const TPMI_DH_OBJECT parentHandle,
   TPM_RC responseCode;
   TPM_RC rc;
   grub_uint32_t parameterSize;
+
+  if (!inSensitive || !inPublic || !outsideInfo || !creationPCR)
+    return TPM_RC_VALUE;
 
   if (!outPrivate)
     outPrivate = &outPrivateTmp;
