@@ -181,6 +181,9 @@ typedef grub_uint16_t TPM_ALG_ID;
 #define TPM_ALG_CFB            ((TPM_ALG_ID) 0x0043)
 #define TPM_ALG_ECB            ((TPM_ALG_ID) 0x0044)
 #define TPM_ALG_ECC            ((TPM_ALG_ID) 0x0023)
+#define TPM_ALG_ECDAA          ((TPM_ALG_ID) 0x001A)
+#define TPM_ALG_ECDSA          ((TPM_ALG_ID) 0x0018)
+#define TPM_ALG_ECSCHNORR      ((TPM_ALG_ID) 0x001C)
 #define TPM_ALG_HMAC           ((TPM_ALG_ID) 0x0005)
 #define TPM_ALG_KDF1_SP800_108 ((TPM_ALG_ID) 0x0022)
 #define TPM_ALG_KDF1_SP800_56A ((TPM_ALG_ID) 0x0020)
@@ -189,10 +192,13 @@ typedef grub_uint16_t TPM_ALG_ID;
 #define TPM_ALG_MGF1           ((TPM_ALG_ID) 0x0007)
 #define TPM_ALG_NULL           ((TPM_ALG_ID) 0x0010)
 #define TPM_ALG_RSA            ((TPM_ALG_ID) 0x0001)
+#define TPM_ALG_RSASSA         ((TPM_ALG_ID) 0x0014)
+#define TPM_ALG_RSAPSS         ((TPM_ALG_ID) 0x0016)
 #define TPM_ALG_SHA1           ((TPM_ALG_ID) 0x0004)
 #define TPM_ALG_SHA256         ((TPM_ALG_ID) 0x000B)
 #define TPM_ALG_SHA384         ((TPM_ALG_ID) 0x000C)
 #define TPM_ALG_SHA512         ((TPM_ALG_ID) 0x000D)
+#define TPM_ALG_SM2            ((TPM_ALG_ID) 0x001B)
 #define TPM_ALG_SM3_256        ((TPM_ALG_ID) 0x0012)
 #define TPM_ALG_SM4            ((TPM_ALG_ID) 0x0013)
 #define TPM_ALG_SYMCIPHER      ((TPM_ALG_ID) 0x0025)
@@ -299,20 +305,27 @@ typedef grub_uint16_t TPM_ECC_CURVE;
 /* TPM_CC Constants */
 typedef grub_uint32_t TPM_CC;
 
-#define TPM_CC_EvictControl     ((TPM_CC) 0x00000120)
-#define TPM_CC_CreatePrimary    ((TPM_CC) 0x00000131)
-#define TPM_CC_Create           ((TPM_CC) 0x00000153)
-#define TPM_CC_FlushContext     ((TPM_CC) 0x00000165)
-#define TPM_CC_ReadPublic       ((TPM_CC) 0x00000173)
-#define TPM_CC_StartAuthSession ((TPM_CC) 0x00000176)
-#define TPM_CC_PolicyPCR        ((TPM_CC) 0x0000017f)
-#define TPM_CC_NV_Read          ((TPM_CC) 0x0000014e)
-#define TPM_CC_NV_ReadPublic    ((TPM_CC) 0x00000169)
-#define TPM_CC_GetCapability    ((TPM_CC) 0x0000017a)
-#define TPM_CC_PCR_Read         ((TPM_CC) 0x0000017e)
-#define TPM_CC_Load             ((TPM_CC) 0x00000157)
-#define TPM_CC_Unseal           ((TPM_CC) 0x0000015e)
-#define TPM_CC_PolicyGetDigest  ((TPM_CC) 0x00000189)
+#define TPM_CC_EvictControl      ((TPM_CC) 0x00000120)
+#define TPM_CC_CreatePrimary     ((TPM_CC) 0x00000131)
+#define TPM_CC_Create            ((TPM_CC) 0x00000153)
+#define TPM_CC_FlushContext      ((TPM_CC) 0x00000165)
+#define TPM_CC_ReadPublic        ((TPM_CC) 0x00000173)
+#define TPM_CC_StartAuthSession  ((TPM_CC) 0x00000176)
+#define TPM_CC_PolicyPCR         ((TPM_CC) 0x0000017f)
+#define TPM_CC_NV_Read           ((TPM_CC) 0x0000014e)
+#define TPM_CC_NV_ReadPublic     ((TPM_CC) 0x00000169)
+#define TPM_CC_GetCapability     ((TPM_CC) 0x0000017a)
+#define TPM_CC_PCR_Read          ((TPM_CC) 0x0000017e)
+#define TPM_CC_Load              ((TPM_CC) 0x00000157)
+#define TPM_CC_LoadExternal      ((TPM_CC) 0x00000167)
+#define TPM_CC_Unseal            ((TPM_CC) 0x0000015e)
+#define TPM_CC_PolicyGetDigest   ((TPM_CC) 0x00000189)
+#define TPM_CC_HashSequenceStart ((TPM_CC) 0x00000186)
+#define TPM_CC_SequenceUpdate    ((TPM_CC) 0x0000015c)
+#define TPM_CC_SequenceComplete  ((TPM_CC) 0x0000013e)
+#define TPM_CC_Hash              ((TPM_CC) 0x0000017d)
+#define TPM_CC_VerifySignature   ((TPM_CC) 0x00000177)
+#define TPM_CC_PolicyAuthorize   ((TPM_CC) 0x0000016a)
 
 /* Hash algorithm sizes */
 #define TPM_SHA1_DIGEST_SIZE    20
@@ -354,6 +367,7 @@ typedef TPM_ALG_ID TPMI_ALG_ECC_SCHEME;
 typedef TPM_ALG_ID TPMI_ALG_ASYM_SCHEME;
 typedef TPM_ALG_ID TPMI_ALG_RSA_SCHEME;
 typedef TPM_ALG_ID TPMI_ALG_SYM;
+typedef TPM_ALG_ID TPMI_ALG_SIG_SCHEME;
 
 /* TPM_KEY_BITS Type */
 typedef grub_uint16_t TPM_KEY_BITS;
