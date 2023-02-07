@@ -238,7 +238,10 @@ TPM2_StartAuthSession (const TPMI_DH_OBJECT tpmKey,
   if (tag == TPM_ST_SESSIONS)
     grub_tpm2_mu_TPMS_AUTH_COMMAND_Marshal (&in, authCommand);
   grub_tpm2_mu_TPM2B_Marshal (&in, nonceCaller->size, nonceCaller->buffer);
-  grub_tpm2_mu_TPM2B_Marshal (&in, encryptedSalt->size, encryptedSalt->secret);
+  if (encryptedSalt)
+    grub_tpm2_mu_TPM2B_Marshal (&in, encryptedSalt->size, encryptedSalt->secret);
+  else
+    grub_tpm2_buffer_pack_u16 (&in, 0);
   grub_tpm2_buffer_pack_u8 (&in, sessionType);
   grub_tpm2_mu_TPMT_SYM_DEF_Marshal (&in, symmetric);
   grub_tpm2_buffer_pack_u16 (&in, authHash);
@@ -295,7 +298,10 @@ TPM2_PolicyPCR (const TPMI_SH_POLICY policySessions,
   grub_tpm2_buffer_pack_u32 (&in, policySessions);
   if (tag == TPM_ST_SESSIONS)
     grub_tpm2_mu_TPMS_AUTH_COMMAND_Marshal (&in, authCommand);
-  grub_tpm2_mu_TPM2B_Marshal (&in, pcrDigest->size, pcrDigest->buffer);
+  if (pcrDigest)
+    grub_tpm2_mu_TPM2B_Marshal (&in, pcrDigest->size, pcrDigest->buffer);
+  else
+    grub_tpm2_buffer_pack_u16 (&in, 0);
   grub_tpm2_mu_TPML_PCR_SELECTION_Marshal (&in, pcrs);
   if (in.error)
     return TPM_RC_FAILURE;
