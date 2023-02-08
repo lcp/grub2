@@ -71,6 +71,15 @@ TPM2_Load (const TPMI_DH_OBJECT parent_handle,
 	   TPMS_AUTH_RESPONSE *authResponse);
 
 TPM_RC
+TPM2_LoadExternal (const TPMS_AUTH_COMMAND *authCommand,
+                   const TPM2B_SENSITIVE *inPrivate,
+                   const TPM2B_PUBLIC *inPublic,
+                   const TPMI_RH_HIERARCHY hierarchy,
+                   TPM_HANDLE *objectHandle,
+                   TPM2B_NAME *name,
+                   TPMS_AUTH_RESPONSE *authResponse);
+
+TPM_RC
 TPM2_Unseal (const TPMI_DH_OBJECT item_handle,
 	     const TPMS_AUTH_COMMAND *authCommand,
 	     TPM2B_SENSITIVE_DATA *outData,
@@ -113,5 +122,53 @@ TPM2_EvictControl (const TPMI_RH_PROVISION auth,
 		   const TPMS_AUTH_COMMAND *authCommand,
 		   const TPMI_DH_PERSISTENT persistentHandle,
 		   TPMS_AUTH_RESPONSE *authResponse);
+
+TPM_RC
+TPM2_HashSequenceStart (const TPMS_AUTH_COMMAND *authCommand,
+                        const TPM2B_AUTH *auth,
+                        const TPMI_ALG_HASH hashAlg,
+                        TPMI_DH_OBJECT *sequenceHandle,
+                        TPMS_AUTH_RESPONSE *authResponse);
+
+TPM_RC
+TPM2_SequenceUpdate (const TPMI_DH_OBJECT sequenceHandle,
+                     const TPMS_AUTH_COMMAND *authCommand,
+                     const TPM2B_MAX_BUFFER *buffer,
+                     TPMS_AUTH_RESPONSE *authResponse);
+
+TPM_RC
+TPM2_SequenceComplete (const TPMI_DH_OBJECT sequenceHandle,
+                       const TPMS_AUTH_COMMAND *authCommand,
+                       const TPM2B_MAX_BUFFER *buffer,
+                       const TPMI_RH_HIERARCHY hierarchy,
+                       TPM2B_DIGEST *result,
+                       TPMT_TK_HASHCHECK *validation,
+                       TPMS_AUTH_RESPONSE *authResponse);
+
+TPM_RC
+TPM2_Hash (const TPMS_AUTH_COMMAND *authCommand,
+           const TPM2B_MAX_BUFFER *data,
+           const TPMI_ALG_HASH hashAlg,
+           const TPMI_RH_HIERARCHY hierarchy,
+           TPM2B_DIGEST *outHash,
+           TPMT_TK_HASHCHECK *validation,
+           TPMS_AUTH_RESPONSE *authResponse);
+
+TPM_RC
+TPM2_VerifySignature (const TPMI_DH_OBJECT keyHandle,
+                      const TPMS_AUTH_COMMAND *authCommand,
+                      const TPM2B_DIGEST *digest,
+                      const TPMT_SIGNATURE *signature,
+                      TPMT_TK_VERIFIED *validation,
+                      TPMS_AUTH_RESPONSE *authResponse);
+
+TPM_RC
+TPM2_PolicyAuthorize (const TPMI_SH_POLICY policySession,
+                      const TPMS_AUTH_COMMAND *authCommand,
+                      const TPM2B_DIGEST *approvedPolicy,
+                      const TPM2B_NONCE *policyRef,
+                      const TPM2B_NAME *keySign,
+                      const TPMT_TK_VERIFIED *checkTicket,
+                      TPMS_AUTH_RESPONSE *authResponse);
 
 #endif /* ! GRUB_TPM2_INTERNAL_FUNCTIONS_HEADER */
