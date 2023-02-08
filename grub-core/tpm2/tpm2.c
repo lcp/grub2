@@ -535,6 +535,8 @@ TPM2_PCR_Read (const TPMS_AUTH_COMMAND *authCommand,
 
   /* Marshal */
   grub_tpm2_buffer_init (&in);
+  if (authCommand)
+    grub_tpm2_mu_TPMS_AUTH_COMMAND_Marshal (&in, authCommand);
   grub_tpm2_mu_TPML_PCR_SELECTION_Marshal (&in, pcrSelectionIn);
   if (in.error)
     return TPM_RC_FAILURE;
