@@ -25,11 +25,11 @@
 #include <grub/types.h>
 
 static TPM_RC
-grub_tpm2_submit_command (const TPMI_ST_COMMAND_TAG tag,
-			  const TPM_CC commandCode,
-			  TPM_RC *responseCode,
-			  const struct grub_tpm2_buffer *in,
-			  struct grub_tpm2_buffer *out)
+grub_tpm2_submit_command_real (const TPMI_ST_COMMAND_TAG tag,
+			       const TPM_CC commandCode,
+			       TPM_RC *responseCode,
+			       const struct grub_tpm2_buffer *in,
+			       struct grub_tpm2_buffer *out)
 {
   grub_err_t err;
   struct grub_tpm2_buffer buf;
@@ -73,6 +73,29 @@ grub_tpm2_submit_command (const TPMI_ST_COMMAND_TAG tag,
     return TPM_RC_FAILURE;
 
   return TPM_RC_SUCCESS;
+}
+
+static TPM_RC
+grub_tpm2_submit_command (const TPMI_ST_COMMAND_TAG tag,
+			  const TPM_CC commandCode,
+			  TPM_RC *responseCode,
+			  const struct grub_tpm2_buffer *in,
+			  struct grub_tpm2_buffer *out)
+{
+  TPM_RC err;
+  int retry_cnt = 0;
+
+  /* Catch TPM_RC_RETRY and send the command again */
+  do {
+    err = grub_tpm2_submit_command_real (tag, commandCode, responseCode,
+					 in, out);
+    if (*responseCode != TPM_RC_RETRY)
+      break;
+
+    retry_cnt++;
+  } while (retry_cnt < 3);
+
+  return err;
 }
 
 TPM_RC
