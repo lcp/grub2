@@ -1,0 +1,135 @@
+From d13793c210999b256b46970b5f76d41a57e5c8fc Mon Sep 17 00:00:00 2001
+From: Daniel Axtens <dja@axtens.net>
+Date: Fri, 1 May 2020 20:44:29 +1000
+Subject: [PATCH 2/3] libtasn1: changes for grub compatibility
+
+Do a few things to make libtasn1 compile as part of grub:
+
+ - remove _asn1_strcat and replace strcat with the bound-checked
+   _asn1_str_cat except the one inside _asn1_str_cat. That strcat is
+   replaced with strcpy.
+
+ - adjust header paths in libtasn1.h
+
+ - adjust header paths to "grub/libtasn1.h".
+
+ - replace a 64 bit division with a call to grub_divmod64, preventing
+   creation of __udivdi3 calls on 32 bit platforms.
+
+Cc: Vladimir Serbinenko <phcoder@gmail.com>
+Signed-off-by: Daniel Axtens <dja@axtens.net>
+Signed-off-by: Gary Lin <glin@suse.com>
+---
+ grub-core/lib/libtasn1/lib/decoding.c   | 8 ++++----
+ grub-core/lib/libtasn1/lib/element.c    | 2 +-
+ grub-core/lib/libtasn1/lib/gstr.c       | 2 +-
+ grub-core/lib/libtasn1/lib/int.h        | 3 +--
+ grub-core/lib/libtasn1/lib/parser_aux.c | 2 +-
+ include/grub/libtasn1.h                 | 5 ++---
+ 6 files changed, 10 insertions(+), 12 deletions(-)
+
+diff --git a/grub-core/lib/libtasn1/lib/decoding.c b/grub-core/lib/libtasn1/lib/decoding.c
+index bf9cb13ac..51859fe36 100644
+--- a/grub-core/lib/libtasn1/lib/decoding.c
++++ b/grub-core/lib/libtasn1/lib/decoding.c
+@@ -2016,8 +2016,8 @@ asn1_expand_octet_string (asn1_node_const definitions, asn1_node * element,
+ 	  (p2->type & CONST_ASSIGN))
+ 	{
+ 	  strcpy (name, definitions->name);
+-	  strcat (name, ".");
+-	  strcat (name, p2->name);
++	  _asn1_str_cat (name, sizeof (name), ".");
++	  _asn1_str_cat (name, sizeof (name), p2->name);
+ 
+ 	  len = sizeof (value);
+ 	  result = asn1_read_value (definitions, name, value, &len);
+@@ -2034,8 +2034,8 @@ asn1_expand_octet_string (asn1_node_const definitions, asn1_node * element,
+ 	      if (p2)
+ 		{
+ 		  strcpy (name, definitions->name);
+-		  strcat (name, ".");
+-		  strcat (name, p2->name);
++		  _asn1_str_cat (name, sizeof (name), ".");
++		  _asn1_str_cat (name, sizeof (name), p2->name);
+ 
+ 		  result = asn1_create_element (definitions, name, &aux);
+ 		  if (result == ASN1_SUCCESS)
+diff --git a/grub-core/lib/libtasn1/lib/element.c b/grub-core/lib/libtasn1/lib/element.c
+index bc4c3c8d7..8694fecb9 100644
+--- a/grub-core/lib/libtasn1/lib/element.c
++++ b/grub-core/lib/libtasn1/lib/element.c
+@@ -688,7 +688,7 @@ asn1_write_value (asn1_node node_root, const char *name,
+                 return ASN1_MEM_ERROR; \
+         } else { \
+                 /* this strcat is checked */ \
+-                if (ptr) _asn1_strcat (ptr, data); \
++                if (ptr) _asn1_str_cat ((char *)ptr, ptr_size, (const char *)data); \
+         }
+ 
+ /**
+diff --git a/grub-core/lib/libtasn1/lib/gstr.c b/grub-core/lib/libtasn1/lib/gstr.c
+index eef419554..a9c16f5d3 100644
+--- a/grub-core/lib/libtasn1/lib/gstr.c
++++ b/grub-core/lib/libtasn1/lib/gstr.c
+@@ -36,7 +36,7 @@ _asn1_str_cat (char *dest, size_t dest_tot_size, const char *src)
+ 
+   if (dest_tot_size - dest_size > str_size)
+     {
+-      strcat (dest, src);
++      strcpy (dest + dest_size, src);
+     }
+   else
+     {
+diff --git a/grub-core/lib/libtasn1/lib/int.h b/grub-core/lib/libtasn1/lib/int.h
+index d94d51c8c..7409c7655 100644
+--- a/grub-core/lib/libtasn1/lib/int.h
++++ b/grub-core/lib/libtasn1/lib/int.h
+@@ -35,7 +35,7 @@
+ #  include <sys/types.h>
+ # endif
+ 
+-# include <libtasn1.h>
++# include "grub/libtasn1.h"
+ 
+ # define ASN1_SMALL_VALUE_SIZE 16
+ 
+@@ -115,7 +115,6 @@ extern const tag_and_class_st _asn1_tags[];
+ # define _asn1_strtoul(n,e,b) strtoul((const char *) n, e, b)
+ # define _asn1_strcmp(a,b) strcmp((const char *)a, (const char *)b)
+ # define _asn1_strcpy(a,b) strcpy((char *)a, (const char *)b)
+-# define _asn1_strcat(a,b) strcat((char *)a, (const char *)b)
+ 
+ # if SIZEOF_UNSIGNED_LONG_INT == 8
+ #  define _asn1_strtou64(n,e,b) strtoul((const char *) n, e, b)
+diff --git a/grub-core/lib/libtasn1/lib/parser_aux.c b/grub-core/lib/libtasn1/lib/parser_aux.c
+index c05bd2339..e4e4c0556 100644
+--- a/grub-core/lib/libtasn1/lib/parser_aux.c
++++ b/grub-core/lib/libtasn1/lib/parser_aux.c
+@@ -632,7 +632,7 @@ _asn1_ltostr (int64_t v, char str[LTOSTR_MAX_SIZE])
+   count = 0;
+   do
+     {
+-      d = val / 10;
++      d = grub_divmod64(val, 10, NULL);
+       r = val - d * 10;
+       temp[start + count] = '0' + (char) r;
+       count++;
+diff --git a/include/grub/libtasn1.h b/include/grub/libtasn1.h
+index 058ab27b0..7d64b6ab7 100644
+--- a/include/grub/libtasn1.h
++++ b/include/grub/libtasn1.h
+@@ -54,9 +54,8 @@
+ #  define __LIBTASN1_PURE__
+ # endif
+ 
+-# include <sys/types.h>
+-# include <time.h>
+-# include <stdio.h>		/* for FILE* */
++# include <grub/types.h>
++# include <grub/time.h>
+ 
+ # ifdef __cplusplus
+ extern "C"
+-- 
+2.35.3
+
