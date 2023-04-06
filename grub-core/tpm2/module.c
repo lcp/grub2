@@ -650,6 +650,87 @@ grub_tpm2_protector_policypcr (TPMI_SH_AUTH_SESSION session,
 }
 
 static grub_err_t
+grub_tpm2_protector_policyauthorize (TPMI_SH_AUTH_SESSION session,
+				     struct grub_tpm2_buffer *cmd_buf)
+{
+  TPM2B_PUBLIC pubkey;
+  TPM2B_DIGEST policy_ref;
+  TPMT_SIGNATURE signature;
+  TPM2B_DIGEST pcr_policy;
+  TPM2B_DIGEST pcr_policy_hash;
+  TPMI_ALG_HASH sig_hash;
+  TPMT_TK_VERIFIED verification_ticket;
+  TPM_HANDLE pubkey_handle = 0;
+  TPM2B_NAME pubname;
+  TPM_RC rc;
+  grub_err_t err;
+
+  grub_tpm2_mu_TPM2B_PUBLIC_Unmarshal (cmd_buf, &pubkey);
+  grub_tpm2_mu_TPM2B_DIGEST_Unmarshal (cmd_buf, &policy_ref);
+  grub_tpm2_mu_TPMT_SIGNATURE_Unmarshal (cmd_buf, &signature);
+  if (cmd_buf->error != 0)
+    return grub_error (GRUB_ERR_BAD_ARGUMENT,
+		       N_("Failed to unmarshal the buffer for TPM2_PolicyAuthorize"));
+
+  /* Retrieve Policy Digest */
+  rc = TPM2_PolicyGetDigest (session, NULL, &pcr_policy, NULL);
+  if (rc != TPM_RC_SUCCESS)
+    return grub_error (GRUB_ERR_BAD_DEVICE,
+		       N_("Failed to get policy digest (TPM2_PolicyGetDigest: 0x%x)."),
+		       rc);
+
+  /* Calculate the digest of the polcy for VerifySignature */
+  sig_hash = TPMT_SIGNATURE_get_hash_alg (&signature);
+  if (sig_hash == TPM_ALG_NULL)
+    return grub_error (GRUB_ERR_BAD_ARGUMENT,
+		       N_("Failed to get the hash algorithm of the signature"));
+
+  rc = TPM2_Hash (NULL, (TPM2B_MAX_BUFFER *)&pcr_policy, sig_hash,
+		  TPM_RH_NULL, &pcr_policy_hash, NULL, NULL);
+  if (rc != TPM_RC_SUCCESS)
+    return grub_error (GRUB_ERR_BAD_DEVICE,
+		       N_("Failed to create PCR policy hash (TPM2_Hash: 0x%x)"),
+		       rc);
+
+  /* Load the public key */
+  rc = TPM2_LoadExternal (NULL, NULL, &pubkey, TPM_RH_OWNER,
+			  &pubkey_handle, &pubname, NULL);
+  if (rc != TPM_RC_SUCCESS)
+    return grub_error (GRUB_ERR_BAD_DEVICE,
+		       N_("Failed to load public key (TPM2_LoadExternal: 0x%x)"),
+		       rc);
+
+  /* Verify the signature against the public key and the policy digest */
+  rc = TPM2_VerifySignature (pubkey_handle, NULL, &pcr_policy_hash, &signature,
+			     &verification_ticket, NULL);
+  if (rc != TPM_RC_SUCCESS)
+    {
+      err = grub_error (GRUB_ERR_BAD_DEVICE,
+			N_("Failed to verify signature (TPM2_VerifySignature: 0x%x)"),
+			rc);
+      goto error;
+    }
+
+  /* Authorize the signed policy with the public key and the verification ticket */
+  rc = TPM2_PolicyAuthorize (session, NULL, &pcr_policy, &policy_ref, &pubname,
+			     &verification_ticket, NULL);
+  if (rc != TPM_RC_SUCCESS)
+    {
+      err = grub_error (GRUB_ERR_BAD_DEVICE,
+			N_("Failed to authorize PCR policy (TPM2_PolicyAuthorize: 0x%x)"),
+			rc);
+      goto error;
+    }
+
+  err = GRUB_ERR_NONE;
+
+error:
+  TPM2_FlushContext (pubkey_handle);
+
+  return err;
+}
+
+static grub_err_t
 grub_tpm2_protector_enforce_policy (tpm2key_policy_t policy, TPMI_SH_AUTH_SESSION session)
 {
   struct grub_tpm2_buffer buf;
@@ -667,6 +748,9 @@ grub_tpm2_protector_enforce_policy (tpm2key_policy_t policy, TPMI_SH_AUTH_SESSIO
     {
     case TPM_CC_PolicyPCR:
       err = grub_tpm2_protector_policypcr (session, &buf);
+      break;
+    case TPM_CC_PolicyAuthorize:
+      err = grub_tpm2_protector_policyauthorize (session, &buf);
       break;
     default:
       return grub_error (GRUB_ERR_BAD_ARGUMENT,
