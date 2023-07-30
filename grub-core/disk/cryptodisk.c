@@ -1191,11 +1191,16 @@ grub_cryptodisk_scan_device_real (const char *name,
 		  source->name, source->partition != NULL ? "," : "",
 		  part != NULL ? part : N_("UNKNOWN"), dev->uuid);
       grub_free (part);
-      goto error;
     }
 
   if (!cargs->key_len)
     {
+      if (grub_errno)
+	{
+	  grub_print_error ();
+	  grub_errno = GRUB_ERR_NONE;
+	}
+
       /* Get the passphrase from the user, if no key data. */
       askpass = 1;
       part = grub_partition_get_name (source->partition);
