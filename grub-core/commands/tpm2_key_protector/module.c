@@ -981,11 +981,30 @@ grub_tpm2_protector_srk_recover (const struct grub_tpm2_protector_context *ctx,
 }
 
 static grub_err_t
-grub_tpm2_protector_nv_recover (const struct grub_tpm2_protector_context *ctx __attribute__ ((unused)),
-				grub_uint8_t **key __attribute__ ((unused)),
-				grub_size_t *key_size __attribute__ ((unused)))
+grub_tpm2_protector_nv_recover (const struct grub_tpm2_protector_context *ctx,
+				grub_uint8_t **key, grub_size_t *key_size)
 {
-  return grub_error (GRUB_ERR_NOT_IMPLEMENTED_YET, N_("NV Index mode is not implemented yet"));
+  TPM_HANDLE sealed_handle = ctx->nv;
+  tpm2key_policy_t policy_seq = NULL;
+  grub_err_t err;
+
+  /* Create a basic policy sequence based on the given PCR selection */
+  err = grub_tpm2_protector_simple_policy_seq (ctx, &policy_seq);
+  if (err != GRUB_ERR_NONE)
+    goto exit;
+
+  err = grub_tpm2_protector_unseal (policy_seq, sealed_handle, key, key_size);
+
+  /* Pop error messages on success */
+  if (err == GRUB_ERR_NONE)
+    while (grub_error_pop ());
+
+ exit:
+  TPM2_FlushContext (sealed_handle);
+
+  grub_tpm2key_free_policy_seq (policy_seq);
+
+  return err;
 }
 
 static grub_err_t
