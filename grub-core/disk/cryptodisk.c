@@ -46,7 +46,8 @@ enum
     OPTION_KEYFILE_OFFSET,
     OPTION_KEYFILE_SIZE,
     OPTION_HEADER,
-    OPTION_PROTECTOR
+    OPTION_PROTECTOR,
+    OPTION_RETRY_MAX
   };
 
 static const struct grub_arg_option options[] =
@@ -62,6 +63,7 @@ static const struct grub_arg_option options[] =
     {"header", 'H', 0, N_("Read header from file"), 0, ARG_TYPE_STRING},
     {"protector", 'P', GRUB_ARG_OPTION_REPEATABLE,
      N_("Unlock volume(s) using key protector(s)."), 0, ARG_TYPE_STRING},
+    {"retry", 'r', 0, N_("Maxium password retry count"), 0, ARG_TYPE_INT},
     {0, 0, 0, 0, 0, 0}
   };
 
@@ -1068,6 +1070,7 @@ grub_cryptodisk_scan_device_real (const char *name,
   int i;
   struct cryptodisk_read_hook_ctx read_hook_data = {0};
   int askpass = 0;
+  unsigned long retry_cnt = 0;
   char *part = NULL;
 
   dev = grub_cryptodisk_get_by_source_disk (source);
@@ -1222,6 +1225,31 @@ grub_cryptodisk_scan_device_real (const char *name,
     }
 
   ret = cr->recover_key (source, dev, cargs);
+
+  /* Request another passphrase if the previous one doesn't work */
+  while (askpass == 1 && retry_cnt < cargs->retry_max && ret != GRUB_ERR_NONE)
+    {
+      /* Print the previous errors and get a fresh start */
+      if (grub_errno)
+	{
+	  grub_print_error ();
+	  grub_errno = GRUB_ERR_NONE;
+	}
+
+      grub_printf_ (N_("Enter passphrase (retry %lu): "), retry_cnt+1);
+      if (!grub_password_get ((char *) cargs->key_data, GRUB_CRYPTODISK_MAX_PASSPHRASE))
+	{
+	  grub_error (GRUB_ERR_BAD_ARGUMENT, "passphrase not supplied");
+	  goto error;
+	}
+      cargs->key_len = grub_strlen ((char *) cargs->key_data);
+      ret = cr->recover_key (source, dev, cargs);
+      if (ret == GRUB_ERR_NONE)
+	break;
+
+      retry_cnt++;
+    }
+
   if (ret != GRUB_ERR_NONE)
     goto error;
 
@@ -1474,6 +1502,21 @@ grub_cmd_cryptomount (grub_extcmd_context_t ctxt, int argc, char **args)
       cargs.protectors = state[OPTION_PROTECTOR].args;
     }
 
+  if (state[OPTION_RETRY_MAX].set) /* max retry count */
+    {
+      const char *p = NULL;
+      unsigned long retry_max = 0;
+
+      retry_max = grub_strtoul (state[OPTION_RETRY_MAX].arg, &p, 0);
+
+      if (state[OPTION_RETRY_MAX].arg[0] == '\0' || *p != '\0')
+	return grub_error (grub_errno,
+			   N_("non-numeric or invalid retry max `%s'"),
+			   state[OPTION_RETRY_MAX].arg);
+
+      cargs.retry_max = retry_max;
+    }
+
   if (state[OPTION_UUID].set) /* uuid */
     {
       int found_uuid;
@@ -1695,7 +1738,7 @@ GRUB_MOD_INIT (cryptodisk)
 			      N_("[ [-p password] | [-k keyfile"
 				 " [-O keyoffset] [-S keysize] ] ] [-H file]"
 				 " [-P protector [-P protector ...]]"
-				 " <SOURCE|-u UUID|-a|-b>"),
+				 " [-r retrymax] <SOURCE|-u UUID|-a|-b>"),
 			      N_("Mount a crypto device."), options);
   grub_procfs_register ("luks_script", &luks_script);
 }

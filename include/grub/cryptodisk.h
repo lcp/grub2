@@ -97,6 +97,8 @@ struct grub_cryptomount_args
   char **protectors;
   /* recover_key: Key cache to avoid invoking the same key protector twice */
   struct grub_cryptomount_cached_key *key_cache;
+  /* recover_key: Maximum password retry count */
+  unsigned long retry_max;
 };
 typedef struct grub_cryptomount_args *grub_cryptomount_args_t;
 
