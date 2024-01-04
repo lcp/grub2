@@ -2571,7 +2571,9 @@ module = {
   common = tpm2/tpm2key.c;
   common = tpm2/tpm2key_asn1_tab.c;
   efi = tpm2/tcg2.c;
+  emu = tpm2/tcg2-emu.c;
   enable = efi;
+  enable = emu;
 };
 
 module = {
