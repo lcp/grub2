@@ -1279,6 +1279,12 @@ script = {
   common = tests/test_asn1.in;
 };
 
+script = {
+  testcase = native;
+  name = tpm2_test;
+  common = tests/tpm2_test.in;
+};
+
 program = {
   testcase = native;
   name = example_unit_test;
