@@ -1,0 +1,311 @@
+#! @BUILD_SHEBANG@ -e
+
+# Test GRUBs ability to unseal a LUKS key with TPM 2.0
+# Copyright (C) 2024  Free Software Foundation, Inc.
+#
+# GRUB is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# GRUB is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
+
+grubshell=@builddir@/grub-shell
+
+. "@builddir@/grub-core/modinfo.sh"
+
+if [ x$grub_modinfo_platform != xemu ]; then
+  exit 77
+fi
+
+builddir="@builddir@"
+
+# Force build directory components
+PATH="${builddir}:$PATH"
+export PATH
+
+if [ "x$EUID" = "x" ] ; then
+  EUID=`id -u`
+fi
+
+if [ "$EUID" != 0 ] ; then
+   echo "not root; cannot test tpm2."
+   exit 99
+fi
+
+if ! which cryptsetup >/dev/null 2>&1; then
+   echo "cryptsetup not installed; cannot test tpm2."
+   exit 99
+fi
+
+if ! grep -q tpm_vtpm_proxy /proc/modules && ! modprobe tpm_vtpm_proxy; then
+   echo "no tpm_vtpm_proxy support; cannot test tpm2."
+   exit 99
+fi
+
+if ! which swtpm >/dev/null 2>&1; then
+   echo "swtpm not installed; cannot test tpm2."
+   exit 99
+fi
+
+if ! which tpm2_startup >/dev/null 2>&1; then
+   echo "tpm2-tools not installed; cannot test tpm2."
+   exit 99
+fi
+
+tpm2testdir="`mktemp -d "${TMPDIR:-/tmp}/$(basename "$0").XXXXXXXXXX"`" || exit 20
+
+disksize=20M
+
+luksfile=$tpm2testdir/luks.disk
+lukskeyfile=${tpm2testdir}/password.txt
+
+# Choose a low iteration number to reduce the time to decrypt the disk
+csopt="--type luks2 --pbkdf pbkdf2 --iter-time 1000"
+
+tpm2statedir=${tpm2testdir}/tpm
+tpm2ctrl=${tpm2statedir}/ctrl
+tpm2log=${tpm2statedir}/logfile
+
+sealedkey=${tpm2testdir}/sealed.tpm
+
+timeout=20
+
+testoutput=$tpm2testdir/testoutput
+
+vtext="TEST VERIFIED"
+
+# Create the password file
+echo -n "top secret" > ${lukskeyfile}
+
+# Setup LUKS2 image
+truncate -s ${disksize} ${luksfile} || exit 21
+cryptsetup luksFormat -q ${csopt} ${luksfile} ${lukskeyfile} || exit 22
+
+# Shutdown the swtpm instance on exit
+cleanup() {
+    RET=$?
+    if [ -e "$tpm2ctrl" ]; then
+        swtpm_ioctl -s --unix ${tpm2ctrl}
+    fi
+    if [ "${RET}" -eq 0 ]; then
+        rm -rf "$tpm2testdir" || :
+    fi
+}
+trap cleanup EXIT INT TERM KILL QUIT
+
+mkdir -p ${tpm2statedir}
+
+# Create the swtpm chardev instannce
+swtpm chardev --vtpm-proxy --tpmstate dir=${tpm2statedir} \
+	--tpm2 --ctrl type=unixio,path=${tpm2ctrl} \
+	--flags startup-clear --daemon > ${tpm2log}
+ret=$?
+if [ "$ret" -ne 0 ]; then
+    exit $ret
+fi
+
+tpm2dev=$(grep "New TPM device" ${tpm2log} | cut -d' ' -f 4)
+if [ -z "${tpm2dev}" ]; then
+    exit QUIT
+fi
+
+# Wait for tpm2 chardev
+wait=3
+while [ "${wait}" -gt 0 ]; do
+    if [ -c "${tpm2dev}" ]; then
+        break;
+    fi
+    sleep 1
+    ((wait--))
+done
+if [ "$wait" -le 0 ]; then
+    exit QUIT
+fi
+
+# Export the TCTI variable for tpm2-tools
+export TPM2TOOLS_TCTI="device:${tpm2dev}"
+
+# Extend PCR 0
+tpm2_pcrextend 0:sha256=$(sha256sum <<< "test0" | cut -d ' ' -f 1)
+ret=$?
+if [ "$ret" -ne 0 ]; then
+    exit $ret
+fi
+
+# Extend PCR 1
+tpm2_pcrextend 1:sha256=$(sha256sum <<< "test1" | cut -d ' ' -f 1)
+ret=$?
+if [ "$ret" -ne 0 ]; then
+    exit $ret
+fi
+
+tpm2_seal_unseal() {
+    local srk_alg="$1"
+    local handle_type="$2"
+    local srk_test="$3"
+
+    local grub_srk_alg=${srk_alg}
+
+    local extra_opt=""
+    local extra_grub_opt=""
+
+    local persistent_handle="0x81000000"
+
+    if [ "${handle_type}" == "persistent" ]; then
+	extra_opt="--tpm2-srk=${persistent_handle}"
+    fi
+
+    if [ "${srk_alg}" != "default" ]; then
+	extra_opt="${extra_opt} --tpm2-asymmetric=${srk_alg}"
+    fi
+
+    # Seal the password with grub-protect
+    grub-protect ${extra_opt} \
+	    --tpm2-device=${tpm2dev} \
+	    --action=add \
+	    --protector=tpm2 \
+	    --tpm2key \
+	    --tpm2-bank=sha256 \
+	    --tpm2-pcrs=0,1 \
+	    --tpm2-keyfile=${lukskeyfile} \
+	    --tpm2-outfile=${sealedkey}
+    ret=$?
+    if [ "$ret" -ne 0 ]; then
+	echo "Failed to seal the secret key"
+	return 1
+    fi
+
+    # Flip the asymmetric algorithm in grub.cfg to trigger fallback SRKs
+    if [ "${srk_test}" == "fallback_srk" ]; then
+        if [[ "${srk_alg}" == RSA* ]]; then
+            grub_srk_alg="ECC"
+        elif [[ "${srk_alg}" == ECC* ]]; then
+            grub_srk_alg="RSA"
+        fi
+    fi
+
+    if [ "${grub_srk_alg}" != "default" ] && [ "${handle_type}" != "persistent" ]; then
+	extra_grub_opt="-a ${grub_srk_alg}"
+    fi
+
+    # Write the TPM unsealing script
+    cat > ${tpm2testdir}/testcase.cfg <<EOF
+loopback luks (host)${luksfile}
+tpm2_key_protector_init -T (host)${sealedkey} ${extra_grub_opt}
+if cryptomount -a --protector tpm2; then
+    echo "${vtext}"
+fi
+EOF
+
+    # Test TPM unsealing with the same PCR
+    ${grubshell} --timeout=$timeout --grub-emu-opts="-t ${tpm2dev}" < ${tpm2testdir}/testcase.cfg > ${testoutput}
+    ret=$?
+
+    # Remove the persistent handle
+    if [ "${handle_type}" == "persistent" ]; then
+	grub-protect \
+		--tpm2-device=${tpm2dev} \
+		--protector=tpm2 \
+		--action=remove \
+		--tpm2-srk=${persistent_handle} \
+		--tpm2-evict
+    fi
+
+    if [ "$ret" -eq 0 ]; then
+	if ! grep -q "^${vtext}$" "$testoutput"; then
+	    echo "error: test not verified [`cat $testoutput`]" >&2
+	    exit 1
+	fi
+    else
+	echo "grub-emu exited with error: $ret" >&2
+	exit $ret
+    fi
+}
+
+tpm2_seal_unseal_nv() {
+    local persistent_handle="0x81000000"
+    local primary_file=${tpm2testdir}/primary.ctx
+    local session_file=${tpm2testdir}/session.dat
+    local policy_file=${tpm2testdir}/policy.dat
+    local keypub_file=${tpm2testdir}/key.pub
+    local keypriv_file=${tpm2testdir}/key.priv
+    local name_file=${tpm2testdir}/sealing.name
+    local sealing_ctx_file=${tpm2testdir}/sealing.ctx
+
+    # Since we don't run a resource manager on our swtpm instance, it has
+    # to flush the transient handles after tpm2_createprimary, tpm2_create
+    # and tpm2_load to avoid the potential out-of-memory (0x902) errors.
+    # Ref: https://github.com/tpm2-software/tpm2-tools/issues/1338#issuecomment-469689398
+
+    # Create the primary object
+    tpm2_createprimary -C o -g sha256 -G ecc -c ${primary_file} -Q
+    tpm2_flushcontext -t
+
+    # Create the policy object
+    tpm2_startauthsession -S ${session_file}
+    tpm2_policypcr -S ${session_file} -l sha256:0,1 -L ${policy_file} -Q
+    tpm2_flushcontext ${session_file}
+
+    # Seal the key into TPM
+    tpm2_create -C ${primary_file} -u ${keypub_file} -r ${keypriv_file} -L ${policy_file} -i ${lukskeyfile} -Q
+    tpm2_flushcontext -t
+    tpm2_load -C ${primary_file} -u ${keypub_file} -r ${keypriv_file} -n ${name_file} -c ${sealing_ctx_file}
+    tpm2_flushcontext -t
+    tpm2_evictcontrol -C o -c ${sealing_ctx_file} ${persistent_handle} -Q
+
+    # Write the TPM unsealing script
+    cat > ${tpm2testdir}/testcase.cfg <<EOF
+loopback luks (host)${luksfile}
+tpm2_key_protector_init --mode=nv --nvindex=${persistent_handle} --pcrs=0,1
+if cryptomount -a --protector tpm2; then
+    echo "${vtext}"
+fi
+EOF
+
+    # Test TPM unsealing with the same PCR
+    ${grubshell} --timeout=$timeout --grub-emu-opts="-t ${tpm2dev}" < ${tpm2testdir}/testcase.cfg > ${testoutput}
+    ret=$?
+
+    # Remove the persistent handle
+    grub-protect \
+	--tpm2-device=${tpm2dev} \
+	--protector=tpm2 \
+	--action=remove \
+	--tpm2-srk=${persistent_handle} \
+	--tpm2-evict
+
+    if [ "$ret" -eq 0 ]; then
+	if ! grep -q "^${vtext}$" "$testoutput"; then
+	    echo "error: test not verified [`cat $testoutput`]" >&2
+	    exit 1
+	fi
+    else
+	echo "grub-emu exited with error: $ret" >&2
+	exit $ret
+    fi
+}
+
+tpm2_seal_unseal default transient no_fallback_srk
+
+tpm2_seal_unseal RSA transient no_fallback_srk
+
+tpm2_seal_unseal ECC transient no_fallback_srk
+
+tpm2_seal_unseal RSA persistent no_fallback_srk
+
+tpm2_seal_unseal ECC persistent no_fallback_srk
+
+tpm2_seal_unseal RSA transient fallback_srk
+
+tpm2_seal_unseal ECC transient fallback_srk
+
+tpm2_seal_unseal_nv
+
+exit 0
