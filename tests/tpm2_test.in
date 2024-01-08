@@ -1,0 +1,179 @@
+#! @BUILD_SHEBANG@ -e
+
+# Test GRUBs ability to unseal a LUKS key with TPM 2.0
+# Copyright (C) 2024  Free Software Foundation, Inc.
+#
+# GRUB is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# GRUB is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GRUB.  If not, see <http://www.gnu.org/licenses/>.
+
+grubshell=@builddir@/grub-shell
+
+. "@builddir@/grub-core/modinfo.sh"
+
+if [ x$grub_modinfo_platform != xemu ]; then
+  exit 77
+fi
+
+builddir="@builddir@"
+
+# Force build directory components
+PATH="${builddir}:$PATH"
+export PATH
+
+if [ "x$EUID" = "x" ] ; then
+  EUID=`id -u`
+fi
+
+if [ "$EUID" != 0 ] ; then
+   echo "not root; cannot test tpm2."
+   exit 99
+fi
+
+if ! which cryptsetup >/dev/null 2>&1; then
+   echo "cryptsetup not installed; cannot test tpm2."
+   exit 99
+fi
+
+if ! which swtpm >/dev/null 2>&1; then
+   echo "swtpm not installed; cannot test tpm2."
+   exit 99
+fi
+
+if ! which tpm2_startup >/dev/null 2>&1; then
+   echo "tpm2-tools not installed; cannot test tpm2."
+   exit 99
+fi
+
+tpm2testdir="`mktemp -d "${TMPDIR:-/tmp}/$(basename "$0").XXXXXXXXXX"`" || exit 20
+
+disksize=20M
+
+luksfile=$tpm2testdir/luks.disk
+lukskeyfile=${tpm2testdir}/password.txt
+
+# Choose a low iteration number to reduce the time to decrypt the disk
+csopt="--type luks2 --pbkdf pbkdf2 --iter-time 1000"
+
+tpm2devname="vtpm-test0"
+tpm2statedir=${tpm2testdir}/tpm
+tpm2dev="/dev/${tpm2devname}"
+
+sealedkey=${tpm2testdir}/sealed.tpm
+
+timeout=20
+
+testoutput=$tpm2testdir/testoutput
+
+vtext="TEST VERIFIED"
+
+# Create the password file
+echo -n "top secret" > ${lukskeyfile}
+
+# Setup LUKS2 image
+truncate -s ${disksize} ${luksfile} || exit 21
+cryptsetup luksFormat -q ${csopt} ${luksfile} ${lukskeyfile} || exit 22
+
+# Shutdown the swtpm instance on exit
+cleanup() {
+    if [ -e "$tpm2dev" ]; then
+        swtpm_ioctl -s ${tpm2dev}
+    fi
+    if [ "${RET:-1}" -eq 0 ]; then
+        rm -rf "$tpm2testdir" || :
+    fi
+}
+trap cleanup EXIT INT TERM KILL QUIT
+
+# Shutdown the previous swtpm instance if exists
+if [ -c "${tpm2dev}" ]; then
+    swtpm_ioctl -s ${tpm2dev}
+fi
+
+# Create the swtpm cuse instannce
+swtpm_cuse -n ${tpm2devname} --tpm2 --tpmstate dir=${tpm2statedir}
+ret=$?
+if [ "$ret" -ne 0 ]; then
+    exit $ret
+fi
+
+# Initialize swtpm device
+swtpm_ioctl -i ${tpm2dev}
+ret=$?
+if [ "$ret" -ne 0 ]; then
+    exit $ret
+fi
+
+# Export the TCTI variable for tpm2-tools
+export TPM2TOOLS_TCTI="device:${tpm2dev}"
+
+# Send the startup command
+tpm2_startup -c
+ret=$?
+if [ "$ret" -ne 0 ]; then
+    exit $ret
+fi
+
+# Extend PCR 0
+tpm2_pcrextend 0:sha256=$(sha256sum <<< "test0" | cut -d ' ' -f 1)
+ret=$?
+if [ "$ret" -ne 0 ]; then
+    exit $ret
+fi
+
+# Extend PCR 1
+tpm2_pcrextend 1:sha256=$(sha256sum <<< "test1" | cut -d ' ' -f 1)
+ret=$?
+if [ "$ret" -ne 0 ]; then
+    exit $ret
+fi
+
+# Seal the password with grub-protect
+grub-protect \
+	--tpm2-device=${tpm2dev} \
+	--action=add \
+	--protector=tpm2 \
+	--tpm2key \
+	--tpm2-asymmetric=RSA2048 \
+	--tpm2-bank=sha256 \
+	--tpm2-pcrs=0,1 \
+	--tpm2-keyfile=${lukskeyfile} \
+	--tpm2-outfile=${sealedkey}
+ret=$?
+if [ "$ret" -ne 0 ]; then
+	echo "Failed to seal the secret key"
+	exit 1
+fi
+
+# Write the TPM unsealing script
+cat > ${tpm2testdir}/testcase.cfg <<EOF
+loopback luks (host)${luksfile}
+tpm2_key_protector_init -T (host)${sealedkey}
+if cryptomount -a --protector tpm2; then
+    echo "${vtext}"
+fi
+EOF
+
+# Test TPM unsealing with the same PCR
+${grubshell} --timeout=$timeout --grub-emu-opts="-t ${tpm2dev}" < ${tpm2testdir}/testcase.cfg > ${testoutput} || ret=$?
+
+if [ "$ret" -eq 0 ]; then
+    if ! grep -q "^${vtext}$" "$testoutput"; then
+        echo "error: test not verified [`cat $testoutput`]" >&2
+        exit 1
+    fi
+else
+    echo "grub-emu exited with error: $ret" >&2
+    exit $ret
+fi
+
+exit $ret
