@@ -75,6 +75,7 @@ work_directory=${WORKDIR:-`mktemp -d "${TMPDIR:-/tmp}/grub-shell.XXXXXXXXXX"`} |
 
 . "${builddir}/grub-core/modinfo.sh"
 qemuopts=
+grubemuopts=
 serial_port=com0
 serial_null=
 halt_cmd=halt
@@ -281,6 +282,9 @@ for option in "$@"; do
     --qemu-opts=*)
 	qs=`echo "$option" | sed -e 's/--qemu-opts=//'`
 	qemuopts="$qemuopts $qs" ;;
+    --grub-emu-opts=*)
+	qs=`echo "$option" | sed -e 's/--grub-emu-opts=//'`
+	grubemuopts="$grubemuopts $qs" ;;
     --disk=*)
 	dsk=`echo "$option" | sed -e 's/--disk=//'`
 	if [ ${grub_modinfo_platform} = emu ]; then
@@ -576,7 +580,7 @@ elif [ x$boot = xemu ]; then
     cat >"$work_directory/run.sh" <<EOF
 #! @BUILD_SHEBANG@
 SDIR=\$(realpath -e \${0%/*})
-exec "$(realpath -e "${builddir}")/grub-core/grub-emu" -m "\$SDIR/${device_map##*/}" --memdisk "\$SDIR/${roottar##*/}" -r memdisk -d "/boot/grub"
+exec "$(realpath -e "${builddir}")/grub-core/grub-emu" -m "\$SDIR/${device_map##*/}" --memdisk "\$SDIR/${roottar##*/}" -r memdisk -d "/boot/grub" ${grubemuopts}
 EOF
 else
     cat >"$work_directory/run.sh" <<EOF
