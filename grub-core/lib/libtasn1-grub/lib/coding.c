@@ -143,7 +143,7 @@ _asn1_tag_der (unsigned char class, unsigned int tag_value,
 	  temp[k++] = tag_value & 0x7F;
 	  tag_value >>= 7;
 
-	  if (k > ASN1_MAX_TAG_SIZE - 1)
+	  if (k >= ASN1_MAX_TAG_SIZE - 1)
 	    break;		/* will not encode larger tags */
 	}
       *ans_len = k + 1;
