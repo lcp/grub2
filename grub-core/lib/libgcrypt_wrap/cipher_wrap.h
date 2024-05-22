@@ -80,4 +80,6 @@ _gcry_fips_mode (void)
 
 #define spec_from_algo grub_crypto_lookup_md_by_algo
 
+#define USE_SHA512 1
+
 #endif
