@@ -1006,7 +1006,7 @@ module = {
   extra_dist = commands/appendedsig/appendedsig.h;
   // posix wrapper required for gcry to get sys/types.h
   cflags = '$(CFLAGS_POSIX)';
-  cppflags = '-I$(srcdir)/lib/posix_wrap';
+  cppflags = '-I$(srcdir)/lib/posix_wrap $(CPPFLAGS_GCRY)';
 };
 
 module = {

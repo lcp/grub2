@@ -265,6 +265,7 @@ grub_verify_appended_signature (const grub_uint8_t *buf, grub_size_t bufsize)
   struct x509_certificate *pk;
   struct grub_appended_signature sig;
   struct pkcs7_signerInfo *si;
+  gcry_sexp_t s_data, s_sig, s_key;
   int i;
 
   if (!grub_trusted_key)
@@ -288,8 +289,8 @@ grub_verify_appended_signature (const grub_uint8_t *buf, grub_size_t bufsize)
       context = grub_zalloc (si->hash->contextsize);
       if (!context)
 	return grub_errno;
-    
-      si->hash->init (context);
+
+      si->hash->init (context, 0);
       si->hash->write (context, buf, datasize);
       si->hash->final (context);
       hash = si->hash->read (context);
@@ -298,6 +299,16 @@ grub_verify_appended_signature (const grub_uint8_t *buf, grub_size_t bufsize)
 		    "data size %" PRIxGRUB_SIZE ", signer %d hash %02x%02x%02x%02x...\n",
 		    datasize, i, hash[0], hash[1], hash[2], hash[3]);
     
+      rc = _gcry_sexp_build (&s_sig, NULL,
+			     "(sig-val(rsa(s %m)))", si->sig_mpi);
+      if (rc)
+	{
+	  err = grub_error (GRUB_ERR_BAD_SIGNATURE,
+			    N_("Error building signature S-expression: %d"),
+			    rc);
+	  goto cleanup;
+	}
+
       err = GRUB_ERR_BAD_SIGNATURE;
       for (pk = grub_trusted_key; pk; pk = pk->next)
 	{
@@ -305,16 +316,36 @@ grub_verify_appended_signature (const grub_uint8_t *buf, grub_size_t bufsize)
 	  if (rc)
 	    {
 	      err = grub_error (GRUB_ERR_BAD_SIGNATURE,
-    				N_("Error padding hash for RSA verification: %d"),
-    				rc);
+				N_("Error padding hash for RSA verification: %d"),
+				rc);
 	      grub_free (context);
 	      goto cleanup;
 	    }
 
-	  rc = _gcry_pubkey_spec_rsa.verify (0, hashmpi, &si->sig_mpi,
-					     pk->mpis, NULL, NULL);
-	  gcry_mpi_release (hashmpi);
+	  rc = _gcry_sexp_build (&s_data, NULL, "(data (flags raw)(value %m))", hashmpi);
+	  _gcry_mpi_release (hashmpi);
+	  if (rc)
+	    {
+	      err = grub_error (GRUB_ERR_BAD_SIGNATURE,
+				N_("Error building data S-expression: %d"),
+				rc);
+	      grub_free (context);
+	      goto cleanup;
+	    }
 
+	  rc = _gcry_sexp_build (&s_key, NULL,
+				 "(public-key(rsa(n%m)(e%m)))",
+				 pk->mpis[0], pk->mpis[1]);
+	  if (rc)
+	    {
+	      err = grub_error (GRUB_ERR_BAD_SIGNATURE,
+				N_("Error building public key S-expression: %d"),
+				rc);
+	      grub_free (context);
+	      goto cleanup;
+	    }
+
+	  rc = _gcry_pubkey_spec_rsa.verify (s_sig, s_data, s_key);
 	  if (rc == 0)
 	    {
 	      grub_dprintf ("appendedsig",
@@ -327,10 +358,11 @@ grub_verify_appended_signature (const grub_uint8_t *buf, grub_size_t bufsize)
 	  grub_dprintf ("appendedsig",
 			"verify signer %d with key '%s' failed with %d\n", i,
 			pk->subject, rc);
+	  _gcry_sexp_release (s_key);
 	}
 
       grub_free (context);
-
+      _gcry_sexp_release (s_sig);
       if (err == GRUB_ERR_NONE)
 	break;
     }

@@ -18,6 +18,7 @@
 
 #include <grub/dl.h>
 #include <grub/gcrypt/gcrypt.h>
+#include <grub/pkcs1_v15.h>
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
@@ -32,7 +33,7 @@ grub_crypto_rsa_pad (gcry_mpi_t * hmpi, grub_uint8_t * hval,
 {
   grub_size_t tlen, emlen, fflen;
   grub_uint8_t *em, *emptr;
-  unsigned nbits = gcry_mpi_get_nbits (mod);
+  unsigned nbits = _gcry_mpi_get_nbits (mod);
   int ret;
   tlen = hash->mdlen + hash->asnlen;
   emlen = (nbits + 7) / 8;
@@ -53,7 +54,7 @@ grub_crypto_rsa_pad (gcry_mpi_t * hmpi, grub_uint8_t * hval,
   emptr += hash->asnlen;
   grub_memcpy (emptr, hval, hash->mdlen);
 
-  ret = gcry_mpi_scan (hmpi, GCRYMPI_FMT_USG, em, emlen, 0);
+  ret = _gcry_mpi_scan (hmpi, GCRYMPI_FMT_USG, em, emlen, 0);
   grub_free (em);
   return ret;
 }
