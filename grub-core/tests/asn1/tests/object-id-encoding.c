@@ -18,11 +18,7 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-#include "libtasn1.h"
+#include "asn1_test.h"
 
 struct tv
 {
@@ -84,10 +80,10 @@ static const struct tv tv[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_object_id_encoding(void)
 {
   unsigned char der[128];
-  int ret, der_len, i, j;
+  int ret, der_len, i;
 
   for (i = 0; i < (int) (sizeof (tv) / sizeof (tv[0])); i++)
     {
@@ -97,33 +93,21 @@ main (int argc, char *argv[])
 	{
 	  if (ret == tv[i].expected_error)
 	    continue;
-	  fprintf (stderr,
-		   "%d: iter %lu, encoding of OID failed: %s\n",
-		   __LINE__, (unsigned long) i, asn1_strerror (ret));
+	  grub_printf ("%d: iter %lu, encoding of OID failed: %s\n",
+		       __LINE__, (unsigned long) i, asn1_strerror(ret));
 	  return 1;
 	}
       else if (ret != tv[i].expected_error)
-	{
-	  fprintf (stderr,
-		   "%d: iter %lu, encoding of OID %s succeeded when expecting failure\n",
-		   __LINE__, (unsigned long) i, tv[i].oid);
-	  return 1;
-	}
+        {
+	  grub_printf ("%d: iter %lu, encoding of OID %s succeeded when expecting failure\n",
+		       __LINE__, (unsigned long) i, tv[i].oid);
+          return 1;
+        }
 
-      if (der_len != tv[i].der_len || memcmp (der, tv[i].der, der_len) != 0)
+      if (der_len != tv[i].der_len || grub_memcmp(der, tv[i].der, der_len) != 0)
 	{
-	  fprintf (stderr,
-		   "%d: iter %lu, re-encoding of OID %s resulted to different string (%d vs %d bytes)\n",
-		   __LINE__, (unsigned long) i, tv[i].oid, der_len,
-		   tv[i].der_len);
-	  fprintf (stderr, "\nGot:\t\t");
-	  for (j = 0; j < der_len; j++)
-	    fprintf (stderr, "%.2x", der[j]);
-
-	  fprintf (stderr, "\nExpected:\t");
-	  for (j = 0; j < tv[i].der_len; j++)
-	    fprintf (stderr, "%.2x", tv[i].der[j]);
-	  fprintf (stderr, "\n");
+	  grub_printf ("%d: iter %lu, re-encoding of OID %s resulted to different string (%d vs %d bytes)\n",
+		       __LINE__, (unsigned long) i, tv[i].oid, der_len, tv[i].der_len);
 
 	  return 1;
 	}

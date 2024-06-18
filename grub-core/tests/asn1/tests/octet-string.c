@@ -20,11 +20,8 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include "asn1_test.h"
 
-#include "libtasn1.h"
 
 struct tv
 {
@@ -112,15 +109,15 @@ static const struct tv tv[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_octet_string (void)
 {
   unsigned char str[100];
   unsigned char der[100];
   int der_len = sizeof (der);
   int str_size = sizeof (str);
   unsigned char *tmp = NULL;
-  int ret, ret_len, j;
-  size_t i;
+  int ret, ret_len;
+  grub_size_t i;
 
   for (i = 0; i < sizeof (tv) / sizeof (tv[0]); i++)
     {
@@ -135,9 +132,8 @@ main (int argc, char *argv[])
 				sizeof (str), &str_size);
 	  if (ret != tv[i].expected_error)
 	    {
-	      fprintf (stderr,
-		       "%d: asn1_get_octet_der: %s: got %d expected %d\n",
-		       __LINE__, tv[i].name, ret, tv[i].expected_error);
+	      grub_printf ("%d: asn1_get_octet_der: %s: got %d expected %d\n",
+			   __LINE__, tv[i].name, ret, tv[i].expected_error);
 	      return 1;
 	    }
 	  if (tv[i].expected_error)
@@ -145,28 +141,18 @@ main (int argc, char *argv[])
 
 	  if (ret_len != tv[i].der_len - 1)
 	    {
-	      fprintf (stderr,
-		       "%d: error in DER, length returned is %d, had %d\n",
-		       __LINE__, ret_len, tv[i].der_len - 1);
+	      grub_printf ("%d: error in DER, length returned is %d, had %d\n",
+			   __LINE__, ret_len, tv[i].der_len - 1);
 	      return 1;
 	    }
 
 	  if (str_size != tv[i].len
-	      || memcmp (tv[i].string, str, tv[i].len) != 0)
+	      || grub_memcmp (tv[i].string, str, tv[i].len) != 0)
 	    {
-	      fprintf (stderr,
-		       "%d: memcmp: %s: got invalid decoding\n",
-		       __LINE__, tv[i].name);
+	      grub_printf ("%d: memcmp: %s: got invalid decoding\n",
+			   __LINE__, tv[i].name);
 
-	      fprintf (stderr, "\nGot:\t\t");
-	      for (j = 0; j < str_size; j++)
-		fprintf (stderr, "%.2x", str[j]);
-
-	      fprintf (stderr, "\nExpected:\t");
-	      for (j = 0; j < tv[i].len; j++)
-		fprintf (stderr, "%.2x", tv[i].string[j]);
-	      fprintf (stderr, "\n");
-	      return 1;
+              return 1;
 	    }
 
 	  /* Encode */
@@ -174,10 +160,9 @@ main (int argc, char *argv[])
 	  asn1_octet_der (str, str_size, der, &der_len);
 
 	  if (der_len != tv[i].der_len - 1
-	      || memcmp (tv[i].der_str + 1, der, tv[i].der_len - 1) != 0)
+	      || grub_memcmp (tv[i].der_str + 1, der, tv[i].der_len - 1) != 0)
 	    {
-	      fprintf (stderr,
-		       "encoding: %s: got invalid encoding\n", tv[i].name);
+	      grub_printf ("encoding: %s: got invalid encoding\n", tv[i].name);
 	      return 1;
 	    }
 	}
@@ -189,10 +174,9 @@ main (int argc, char *argv[])
 				(unsigned int *) &der_len);
       if (ret != tv[i].expected_error)
 	{
-	  fprintf (stderr,
-		   "%d: asn1_decode_simple_ber: %s: got %s expected %s\n",
-		   __LINE__, tv[i].name, asn1_strerror (ret),
-		   asn1_strerror (tv[i].expected_error));
+	  grub_printf ("%d: asn1_decode_simple_ber: %s: got %s expected %s\n",
+		       __LINE__, tv[i].name, asn1_strerror(ret),
+		       asn1_strerror(tv[i].expected_error));
 	  return 1;
 	}
       if (tv[i].expected_error)
@@ -200,28 +184,17 @@ main (int argc, char *argv[])
 
       if (der_len != tv[i].der_len)
 	{
-	  fprintf (stderr,
-		   "%d: error: %s: DER, length returned is %d, had %d\n",
-		   __LINE__, tv[i].name, der_len, tv[i].der_len);
+	  grub_printf ("%d: error: %s: DER, length returned is %d, had %d\n",
+		       __LINE__, tv[i].name, der_len, tv[i].der_len);
 	  return 1;
 	}
 
-      if (str_size != tv[i].len || memcmp (tv[i].string, tmp, tv[i].len) != 0)
+      if (str_size != tv[i].len || grub_memcmp (tv[i].string, tmp, tv[i].len) != 0)
 	{
-	  fprintf (stderr,
-		   "%d: memcmp: %s: got invalid decoding\n",
-		   __LINE__, tv[i].name);
-	  fprintf (stderr, "\nGot:\t\t");
-	  for (j = 0; j < str_size; j++)
-	    fprintf (stderr, "%.2x", tmp[j]);
-
-	  fprintf (stderr, "\nExpected:\t");
-	  for (j = 0; j < tv[i].len; j++)
-	    fprintf (stderr, "%.2x", tv[i].string[j]);
-	  fprintf (stderr, "\n");
-	  return 1;
+	  grub_printf ("%d: memcmp: %s: got invalid decoding\n", __LINE__, tv[i].name);
+          return 1;
 	}
-      free (tmp);
+      grub_free (tmp);
       tmp = NULL;
 
     }

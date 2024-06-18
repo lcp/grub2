@@ -22,13 +22,9 @@
 /* Description: run reproducers for several fixed issues        */
 /****************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include "asn1_test.h"
 
-#include <libtasn1.h>
-
-#include <int.h>
+#define CONST_DOWN        (1U<<29)
 
 /* produces endless loop (fixed by d4b624b2):
  * The following translates into a single node with all pointers
@@ -53,21 +49,18 @@ const asn1_static_node tab[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_reproducers (void)
 {
-  int result, verbose = 0;
+  int result;
   asn1_node definitions = NULL;
   char errorDescription[ASN1_MAX_ERROR_DESCRIPTION_SIZE];
-
-  if (argc > 1)
-    verbose = 1;
 
   result = asn1_array2tree (endless_asn1_tab, &definitions, errorDescription);
   if (result != ASN1_SUCCESS)
     {
-      asn1_perror (result);
-      printf ("ErrorDescription = %s\n\n", errorDescription);
-      exit (EXIT_FAILURE);
+      grub_printf ("Error: %s\nErrorDescription = %s\n\n",
+		   asn1_strerror (result), errorDescription);
+      return 1;
     }
 
   asn1_delete_structure (&definitions);
@@ -76,15 +69,12 @@ main (int argc, char *argv[])
   result = asn1_array2tree (tab, &definitions, errorDescription);
   if (result != ASN1_SUCCESS)
     {
-      asn1_perror (result);
-      printf ("ErrorDescription = %s\n\n", errorDescription);
-      exit (EXIT_FAILURE);
+      grub_printf ("Error: %s\nErrorDescription = %s\n\n",
+		   asn1_strerror (result), errorDescription);
+      return 1;
     }
 
   asn1_delete_structure (&definitions);
 
-  if (verbose)
-    printf ("Success\n");
-
-  exit (EXIT_SUCCESS);
+  return 0;
 }

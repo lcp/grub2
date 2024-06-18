@@ -20,11 +20,7 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-#include "libtasn1.h"
+#include "asn1_test.h"
 
 struct tv
 {
@@ -74,7 +70,7 @@ static const struct tv ber[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_strings ()
 {
   int ret;
   unsigned char tl[ASN1_MAX_TL_SIZE];
@@ -93,17 +89,15 @@ main (int argc, char *argv[])
 				    tl, &tl_len);
       if (ret != ASN1_SUCCESS)
 	{
-	  fprintf (stderr, "Encoding error in %u: %s\n", i,
-		   asn1_strerror (ret));
+	  grub_printf ("Encoding error in %u: %s\n", i, asn1_strerror (ret));
 	  return 1;
 	}
       der_len = tl_len + tv[i].str_len;
 
-      if (der_len != tv[i].der_len || memcmp (tl, tv[i].der, tl_len) != 0)
+      if (der_len != tv[i].der_len || grub_memcmp (tl, tv[i].der, tl_len) != 0)
 	{
-	  fprintf (stderr,
-		   "DER encoding differs in %u! (size: %u, expected: %u)\n",
-		   i, der_len, tv[i].der_len);
+	  grub_printf ("DER encoding differs in %u! (size: %u, expected: %u)\n",
+		       i, der_len, tv[i].der_len);
 	  return 1;
 	}
 
@@ -113,16 +107,14 @@ main (int argc, char *argv[])
 				&str_len);
       if (ret != ASN1_SUCCESS)
 	{
-	  fprintf (stderr, "Decoding error in %u: %s\n", i,
-		   asn1_strerror (ret));
+	  grub_printf ("Decoding error in %u: %s\n", i, asn1_strerror (ret));
 	  return 1;
 	}
 
-      if (str_len != tv[i].str_len || memcmp (str, tv[i].str, str_len) != 0)
+      if (str_len != tv[i].str_len || grub_memcmp (str, tv[i].str, str_len) != 0)
 	{
-	  fprintf (stderr,
-		   "DER decoded data differ in %u! (size: %u, expected: %u)\n",
-		   i, der_len, tv[i].str_len);
+	  grub_printf ("DER decoded data differ in %u! (size: %u, expected: %u)\n",
+		       i, der_len, tv[i].str_len);
 	  return 1;
 	}
     }
@@ -136,19 +128,17 @@ main (int argc, char *argv[])
 				&str_len, NULL);
       if (ret != ASN1_SUCCESS)
 	{
-	  fprintf (stderr, "BER decoding error in %u: %s\n", i,
-		   asn1_strerror (ret));
+	  grub_printf ("BER decoding error in %u: %s\n", i, asn1_strerror (ret));
 	  return 1;
 	}
 
-      if (str_len != ber[i].str_len || memcmp (b, ber[i].str, str_len) != 0)
+      if (str_len != ber[i].str_len || grub_memcmp (b, ber[i].str, str_len) != 0)
 	{
-	  fprintf (stderr,
-		   "BER decoded data differ in %u! (size: %u, expected: %u)\n",
-		   i, str_len, ber[i].str_len);
+	  grub_printf ("BER decoded data differ in %u! (size: %u, expected: %u)\n",
+		       i, str_len, ber[i].str_len);
 	  return 1;
 	}
-      free (b);
+      grub_free(b);
     }
 
 

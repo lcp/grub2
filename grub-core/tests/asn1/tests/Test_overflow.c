@@ -20,22 +20,13 @@
 
 /* Written by Simon Josefsson */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
-
-#include "libtasn1.h"
+#include "asn1_test.h"
 
 int
-main (int argc, char **argv)
+test_overflow(void)
 {
   /* Test that values larger than long are rejected.  This has worked
      fine with all versions of libtasn1. */
-  int verbose = 0;
-
-  if (argc > 1)
-    verbose = 1;
 
   {
     unsigned char der[] = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
@@ -44,23 +35,18 @@ main (int argc, char **argv)
 
     l = asn1_get_length_der (der, sizeof der, &len);
 
-    if (l == -2L)
+    if (l != -2L)
       {
-	if (verbose)
-	  puts ("OK: asn1_get_length_der bignum");
-      }
-    else
-      {
-	printf ("ERROR: asn1_get_length_der bignum (l %ld len %d)\n", l, len);
+	grub_printf ("ERROR: asn1_get_length_der bignum (l %ld len %d)\n", l, len);
 	return 1;
       }
   }
 
   /* Test that values larger than int but smaller than long are
      rejected.  This limitation was introduced with libtasn1 2.12. */
-  if (LONG_MAX > INT_MAX)
+#if (GRUB_LONG_MAX > GRUB_INT_MAX)
     {
-      unsigned long num = ((long) UINT_MAX) << 2;
+      unsigned long num = ((long) GRUB_UINT_MAX) << 2;
       unsigned char der[20];
       int der_len;
       long l;
@@ -70,18 +56,14 @@ main (int argc, char **argv)
 
       l = asn1_get_length_der (der, der_len, &len);
 
-      if (l == -2L)
+      if (l != -2L)
 	{
-	  if (verbose)
-	    puts ("OK: asn1_get_length_der intnum");
-	}
-      else
-	{
-	  printf ("ERROR: asn1_get_length_der intnum (l %ld len %d)\n", l,
-		  len);
+	  grub_printf ("ERROR: asn1_get_length_der intnum (l %ld len %d)\n", l,
+		       len);
 	  return 1;
 	}
     }
+#endif
 
   /* Test that values larger than would fit in the input string are
      rejected.  This problem was fixed in libtasn1 2.12. */
@@ -97,15 +79,10 @@ main (int argc, char **argv)
     der_len = sizeof (der);
     l = asn1_get_length_der (der, der_len, &len);
 
-    if (l == -4L)
+    if (l != -4L)
       {
-	if (verbose)
-	  puts ("OK: asn1_get_length_der overflow-small");
-      }
-    else
-      {
-	printf ("ERROR: asn1_get_length_der overflow-small (l %ld len %d)\n",
-		l, len);
+	grub_printf ("ERROR: asn1_get_length_der overflow-small (l %ld len %d)\n",
+		     l, len);
 	return 1;
       }
   }
@@ -124,15 +101,10 @@ main (int argc, char **argv)
     der_len = sizeof (der);
     l = asn1_get_length_der (der, der_len, &len);
 
-    if (l == -4L)
+    if (l != -4L)
       {
-	if (verbose)
-	  puts ("OK: asn1_get_length_der overflow-large1");
-      }
-    else
-      {
-	printf ("ERROR: asn1_get_length_der overflow-large1 (l %ld len %d)\n",
-		l, len);
+	grub_printf ("ERROR: asn1_get_length_der overflow-large1 (l %ld len %d)\n",
+		     l, len);
 	return 1;
       }
   }
@@ -151,15 +123,10 @@ main (int argc, char **argv)
     der_len = sizeof (der);
     l = asn1_get_length_der (der, der_len, &len);
 
-    if (l == -2L)
+    if (l != -2L)
       {
-	if (verbose)
-	  puts ("OK: asn1_get_length_der overflow-large2");
-      }
-    else
-      {
-	printf ("ERROR: asn1_get_length_der overflow-large2 (l %ld len %d)\n",
-		l, len);
+	grub_printf ("ERROR: asn1_get_length_der overflow-large2 (l %ld len %d)\n",
+		     l, len);
 	return 1;
       }
   }

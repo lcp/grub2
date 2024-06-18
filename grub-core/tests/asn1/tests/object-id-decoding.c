@@ -18,11 +18,7 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-#include "libtasn1.h"
+#include "asn1_test.h"
 
 struct tv
 {
@@ -74,11 +70,11 @@ static const struct tv tv[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_object_id_decoding (void)
 {
   char str[128];
   int ret, ret_len;
-  size_t i;
+  grub_size_t i;
 
   for (i = 0; i < sizeof (tv) / sizeof (tv[0]); i++)
     {
@@ -89,10 +85,8 @@ main (int argc, char *argv[])
 				sizeof (str));
       if (ret != tv[i].expected_error)
 	{
-	  fprintf (stderr,
-		   "%d: asn1_get_object_id_der iter %lu: got '%s' expected %d\n",
-		   __LINE__, (unsigned long) i, asn1_strerror (ret),
-		   tv[i].expected_error);
+	  grub_printf ("%d: asn1_get_object_id_der iter %lu: got '%s' expected %d\n",
+		       __LINE__, (unsigned long) i, asn1_strerror(ret), tv[i].expected_error);
 	  return 1;
 	}
 
@@ -101,17 +95,15 @@ main (int argc, char *argv[])
 
       if (ret_len != tv[i].der_len - 1)
 	{
-	  fprintf (stderr,
-		   "%d: iter %lu: error in DER, length returned is %d, had %d\n",
-		   __LINE__, (unsigned long) i, ret_len, tv[i].der_len - 1);
+	  grub_printf ("%d: iter %lu: error in DER, length returned is %d, had %d\n",
+		       __LINE__, (unsigned long)i, ret_len, tv[i].der_len-1);
 	  return 1;
 	}
 
-      if (strcmp (tv[i].oid, str) != 0)
+      if (grub_strcmp (tv[i].oid, str) != 0)
 	{
-	  fprintf (stderr,
-		   "%d: strcmp iter %lu: got invalid OID: %s, expected: %s\n",
-		   __LINE__, (unsigned long) i, str, tv[i].oid);
+	  grub_printf ("%d: strcmp iter %lu: got invalid OID: %s, expected: %s\n",
+		       __LINE__, (unsigned long) i, str, tv[i].oid);
 	  return 1;
 	}
 
