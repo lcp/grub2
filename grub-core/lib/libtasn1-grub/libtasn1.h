@@ -54,9 +54,8 @@
 #  define __LIBTASN1_PURE__
 # endif
 
-# include <sys/types.h>
-# include <time.h>
-# include <stdio.h>		/* for FILE* */
+# include <grub/types.h>
+# include <grub/time.h>
 
 # ifdef __cplusplus
 extern "C"
