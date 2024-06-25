@@ -1,0 +1,32 @@
+From da7ac4d6dff8876fc18f006de3c72da3c93833f5 Mon Sep 17 00:00:00 2001
+From: Gary Lin <glin@suse.com>
+Date: Tue, 25 Jun 2024 16:30:40 +0800
+Subject: [PATCH 3/6] libtasn1: adjust the header paths in libtasn1.h
+
+Use the grub headers instead of the standard POSIX headers.
+
+Signed-off-by: Daniel Axtens <dja@axtens.net>
+Signed-off-by: Gary Lin <glin@suse.com>
+---
+ grub-core/lib/libtasn1-grub/libtasn1.h | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/grub-core/lib/libtasn1-grub/libtasn1.h b/grub-core/lib/libtasn1-grub/libtasn1.h
+index 058ab27b0..7d64b6ab7 100644
+--- a/grub-core/lib/libtasn1-grub/libtasn1.h
++++ b/grub-core/lib/libtasn1-grub/libtasn1.h
+@@ -54,9 +54,8 @@
+ #  define __LIBTASN1_PURE__
+ # endif
+ 
+-# include <sys/types.h>
+-# include <time.h>
+-# include <stdio.h>		/* for FILE* */
++# include <grub/types.h>
++# include <grub/time.h>
+ 
+ # ifdef __cplusplus
+ extern "C"
+-- 
+2.35.3
+
