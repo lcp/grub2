@@ -59,7 +59,7 @@ test_reproducers (void)
   if (result != ASN1_SUCCESS)
     {
       grub_printf ("Error: %s\nErrorDescription = %s\n\n", asn1_strerror (result), errorDescription);
-      exit (EXIT_FAILURE);
+      return 1;
     }
 
   asn1_delete_structure (&definitions);
@@ -69,10 +69,10 @@ test_reproducers (void)
   if (result != ASN1_SUCCESS)
     {
       grub_printf ("Error: %s\nErrorDescription = %s\n\n", asn1_strerror (result), errorDescription);
-      exit (EXIT_FAILURE);
+      return 1;
     }
 
   asn1_delete_structure (&definitions);
 
-  exit (EXIT_SUCCESS);
+  return 0;
 }
