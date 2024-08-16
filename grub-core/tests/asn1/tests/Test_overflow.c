@@ -20,12 +20,7 @@
 
 /* Written by Simon Josefsson */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
-
-#include "libtasn1.h"
+#include "asn1_test.h"
 
 int
 main (int argc, char **argv)
