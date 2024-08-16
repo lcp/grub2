@@ -74,7 +74,7 @@ test_object_id_decoding (void)
 {
   char str[128];
   int ret, ret_len;
-  size_t i;
+  grub_size_t i;
 
   for (i = 0; i < sizeof (tv) / sizeof (tv[0]); i++)
     {
@@ -100,7 +100,7 @@ test_object_id_decoding (void)
 	  return 1;
 	}
 
-      if (strcmp (tv[i].oid, str) != 0)
+      if (grub_strcmp (tv[i].oid, str) != 0)
 	{
 	  grub_printf ("%d: strcmp iter %lu: got invalid OID: %s, expected: %s\n",
 		       __LINE__, (unsigned long) i, str, tv[i].oid);
