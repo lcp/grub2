@@ -36,7 +36,7 @@ test_overflow (void)
 
     if (l != -2L)
       {
-	printf ("ERROR: asn1_get_length_der bignum (l %ld len %d)\n", l, len);
+	grub_printf ("ERROR: asn1_get_length_der bignum (l %ld len %d)\n", l, len);
 	return 1;
       }
   }
@@ -57,8 +57,7 @@ test_overflow (void)
 
       if (l != -2L)
 	{
-	  printf ("ERROR: asn1_get_length_der intnum (l %ld len %d)\n", l,
-		  len);
+	  grub_printf ("ERROR: asn1_get_length_der intnum (l %ld len %d)\n", l, len);
 	  return 1;
 	}
     }
@@ -79,8 +78,7 @@ test_overflow (void)
 
     if (l != -4L)
       {
-	printf ("ERROR: asn1_get_length_der overflow-small (l %ld len %d)\n",
-		l, len);
+	grub_printf ("ERROR: asn1_get_length_der overflow-small (l %ld len %d)\n", l, len);
 	return 1;
       }
   }
@@ -101,8 +99,7 @@ test_overflow (void)
 
     if (l != -4L)
       {
-	printf ("ERROR: asn1_get_length_der overflow-large1 (l %ld len %d)\n",
-		l, len);
+	grub_printf ("ERROR: asn1_get_length_der overflow-large1 (l %ld len %d)\n", l, len);
 	return 1;
       }
   }
@@ -123,8 +120,7 @@ test_overflow (void)
 
     if (l != -2L)
       {
-	printf ("ERROR: asn1_get_length_der overflow-large2 (l %ld len %d)\n",
-		l, len);
+	grub_printf ("ERROR: asn1_get_length_der overflow-large2 (l %ld len %d)\n", l, len);
 	return 1;
       }
   }

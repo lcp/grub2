@@ -93,33 +93,29 @@ test_object_id_encoding (void)
 	{
 	  if (ret == tv[i].expected_error)
 	    continue;
-	  fprintf (stderr,
-		   "%d: iter %lu, encoding of OID failed: %s\n",
-		   __LINE__, (unsigned long) i, asn1_strerror (ret));
+	  grub_printf ("%d: iter %lu, encoding of OID failed: %s\n",
+		       __LINE__, (unsigned long) i, asn1_strerror (ret));
 	  return 1;
 	}
       else if (ret != tv[i].expected_error)
 	{
-	  fprintf (stderr,
-		   "%d: iter %lu, encoding of OID %s succeeded when expecting failure\n",
-		   __LINE__, (unsigned long) i, tv[i].oid);
+	  grub_printf ("%d: iter %lu, encoding of OID %s succeeded when expecting failure\n",
+		       __LINE__, (unsigned long) i, tv[i].oid);
 	  return 1;
 	}
 
       if (der_len != tv[i].der_len || memcmp (der, tv[i].der, der_len) != 0)
 	{
-	  fprintf (stderr,
-		   "%d: iter %lu, re-encoding of OID %s resulted to different string (%d vs %d bytes)\n",
-		   __LINE__, (unsigned long) i, tv[i].oid, der_len,
-		   tv[i].der_len);
-	  fprintf (stderr, "\nGot:\t\t");
+	  grub_printf ("%d: iter %lu, re-encoding of OID %s resulted to different string (%d vs %d bytes)\n",
+		   __LINE__, (unsigned long) i, tv[i].oid, der_len, tv[i].der_len);
+	  grub_printf ("\nGot:\t\t");
 	  for (j = 0; j < der_len; j++)
-	    fprintf (stderr, "%.2x", der[j]);
+	    grub_printf ("%.2x", der[j]);
 
-	  fprintf (stderr, "\nExpected:\t");
+	  grub_printf ("\nExpected:\t");
 	  for (j = 0; j < tv[i].der_len; j++)
-	    fprintf (stderr, "%.2x", tv[i].der[j]);
-	  fprintf (stderr, "\n");
+	    grub_printf ("%.2x", tv[i].der[j]);
+	  grub_printf ("\n");
 
 	  return 1;
 	}
