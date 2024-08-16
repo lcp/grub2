@@ -63,7 +63,7 @@ test_reproducers (void)
     {
       asn1_perror (result);
       printf ("ErrorDescription = %s\n\n", errorDescription);
-      exit (EXIT_FAILURE);
+      return 1;
     }
 
   asn1_delete_structure (&definitions);
@@ -74,7 +74,7 @@ test_reproducers (void)
     {
       asn1_perror (result);
       printf ("ErrorDescription = %s\n\n", errorDescription);
-      exit (EXIT_FAILURE);
+      return 1;
     }
 
   asn1_delete_structure (&definitions);
@@ -82,5 +82,5 @@ test_reproducers (void)
   if (verbose)
     printf ("Success\n");
 
-  exit (EXIT_SUCCESS);
+  return 0;
 }
