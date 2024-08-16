@@ -27,11 +27,6 @@ test_overflow (void)
 {
   /* Test that values larger than long are rejected.  This has worked
      fine with all versions of libtasn1. */
-  int verbose = 0;
-
-  if (argc > 1)
-    verbose = 1;
-
   {
     unsigned char der[] = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
     long l;
@@ -39,12 +34,7 @@ test_overflow (void)
 
     l = asn1_get_length_der (der, sizeof der, &len);
 
-    if (l == -2L)
-      {
-	if (verbose)
-	  puts ("OK: asn1_get_length_der bignum");
-      }
-    else
+    if (l != -2L)
       {
 	printf ("ERROR: asn1_get_length_der bignum (l %ld len %d)\n", l, len);
 	return 1;
@@ -65,12 +55,7 @@ test_overflow (void)
 
       l = asn1_get_length_der (der, der_len, &len);
 
-      if (l == -2L)
-	{
-	  if (verbose)
-	    puts ("OK: asn1_get_length_der intnum");
-	}
-      else
+      if (l != -2L)
 	{
 	  printf ("ERROR: asn1_get_length_der intnum (l %ld len %d)\n", l,
 		  len);
@@ -92,12 +77,7 @@ test_overflow (void)
     der_len = sizeof (der);
     l = asn1_get_length_der (der, der_len, &len);
 
-    if (l == -4L)
-      {
-	if (verbose)
-	  puts ("OK: asn1_get_length_der overflow-small");
-      }
-    else
+    if (l != -4L)
       {
 	printf ("ERROR: asn1_get_length_der overflow-small (l %ld len %d)\n",
 		l, len);
@@ -119,12 +99,7 @@ test_overflow (void)
     der_len = sizeof (der);
     l = asn1_get_length_der (der, der_len, &len);
 
-    if (l == -4L)
-      {
-	if (verbose)
-	  puts ("OK: asn1_get_length_der overflow-large1");
-      }
-    else
+    if (l != -4L)
       {
 	printf ("ERROR: asn1_get_length_der overflow-large1 (l %ld len %d)\n",
 		l, len);
@@ -146,12 +121,7 @@ test_overflow (void)
     der_len = sizeof (der);
     l = asn1_get_length_der (der, der_len, &len);
 
-    if (l == -2L)
-      {
-	if (verbose)
-	  puts ("OK: asn1_get_length_der overflow-large2");
-      }
-    else
+    if (l != -2L)
       {
 	printf ("ERROR: asn1_get_length_der overflow-large2 (l %ld len %d)\n",
 		l, len);
