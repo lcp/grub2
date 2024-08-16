@@ -22,13 +22,9 @@
 /* Description: run reproducers for several fixed issues        */
 /****************************************************************/
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include "asn1_test.h"
 
-#include <libtasn1.h>
-
-#include <int.h>
+#define CONST_DOWN        (1U<<29)
 
 /* produces endless loop (fixed by d4b624b2):
  * The following translates into a single node with all pointers
