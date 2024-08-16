@@ -85,10 +85,8 @@ test_object_id_decoding (void)
 				sizeof (str));
       if (ret != tv[i].expected_error)
 	{
-	  fprintf (stderr,
-		   "%d: asn1_get_object_id_der iter %lu: got '%s' expected %d\n",
-		   __LINE__, (unsigned long) i, asn1_strerror (ret),
-		   tv[i].expected_error);
+	  grub_printf ("%d: asn1_get_object_id_der iter %lu: got '%s' expected %d\n",
+		       __LINE__, (unsigned long) i, asn1_strerror (ret), tv[i].expected_error);
 	  return 1;
 	}
 
@@ -97,17 +95,15 @@ test_object_id_decoding (void)
 
       if (ret_len != tv[i].der_len - 1)
 	{
-	  fprintf (stderr,
-		   "%d: iter %lu: error in DER, length returned is %d, had %d\n",
-		   __LINE__, (unsigned long) i, ret_len, tv[i].der_len - 1);
+	  grub_printf ("%d: iter %lu: error in DER, length returned is %d, had %d\n",
+		       __LINE__, (unsigned long) i, ret_len, tv[i].der_len - 1);
 	  return 1;
 	}
 
       if (strcmp (tv[i].oid, str) != 0)
 	{
-	  fprintf (stderr,
-		   "%d: strcmp iter %lu: got invalid OID: %s, expected: %s\n",
-		   __LINE__, (unsigned long) i, str, tv[i].oid);
+	  grub_printf ("%d: strcmp iter %lu: got invalid OID: %s, expected: %s\n",
+		       __LINE__, (unsigned long) i, str, tv[i].oid);
 	  return 1;
 	}
 

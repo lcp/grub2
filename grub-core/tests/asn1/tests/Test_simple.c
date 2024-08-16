@@ -94,7 +94,7 @@ test_simple (void)
     result = asn1_encode_simple_der (etype, my_str, my_str_len, tl, &tl_len);
     if (result != ASN1_VALUE_NOT_VALID)
       {
-	fprintf (stderr, "asn1_encode_simple_der out of range etype\n");
+	grub_printf ("asn1_encode_simple_der out of range etype\n");
 	return 1;
       }
   }
@@ -105,7 +105,7 @@ test_simple (void)
   result = asn1_get_bit_der (der, 0, &ret_len, str, str_size, &bit_len);
   if (result != ASN1_GENERIC_ERROR)
     {
-      fprintf (stderr, "asn1_get_bit_der zero\n");
+      grub_printf ("asn1_get_bit_der zero\n");
       return 1;
     }
 
@@ -129,7 +129,7 @@ test_simple (void)
 
       if (der_len != tv[i].derlen || memcmp (der, tv[i].der, der_len) != 0)
 	{
-	  fprintf (stderr, "asn1_bit_der iter %lu\n", (unsigned long) i);
+	  grub_printf ("asn1_bit_der iter %lu\n", (unsigned long) i);
 	  return 1;
 	}
 
@@ -140,8 +140,7 @@ test_simple (void)
       if (result != ASN1_SUCCESS || ret_len != tv[i].derlen
 	  || bit_len != tv[i].bitlen)
 	{
-	  fprintf (stderr, "asn1_get_bit_der iter %lu, err: %d\n",
-		   (unsigned long) i, result);
+	  grub_printf ("asn1_get_bit_der iter %lu, err: %d\n", (unsigned long) i, result);
 	  return 1;
 	}
     }
@@ -163,7 +162,7 @@ test_simple (void)
   if (result != ASN1_SUCCESS || ret_len != 5
       || bit_len != 18 || memcmp (str, "\x6e\x5d\xc0", 3) != 0)
     {
-      fprintf (stderr, "asn1_get_bit_der example\n");
+      grub_printf ("asn1_get_bit_der example\n");
       return 1;
     }
 
@@ -171,7 +170,7 @@ test_simple (void)
   asn1_bit_der (str, bit_len, der, &der_len);
   if (der_len != 5 || memcmp (der, "\x04\x06\x6e\x5d\xc0", 5) != 0)
     {
-      fprintf (stderr, "asn1_bit_der example roundtrip\n");
+      grub_printf ("asn1_bit_der example roundtrip\n");
       return 1;
     }
 
@@ -184,7 +183,7 @@ test_simple (void)
   if (result != ASN1_SUCCESS || ret_len != 5
       || bit_len != 18 || memcmp (str, "\x6e\x5d\xe0", 3) != 0)
     {
-      fprintf (stderr, "asn1_get_bit_der example padded\n");
+      grub_printf ("asn1_get_bit_der example padded\n");
       return 1;
     }
 
@@ -192,7 +191,7 @@ test_simple (void)
   asn1_bit_der (str, bit_len, der, &der_len);
   if (der_len != 5 || memcmp (der, "\x04\x06\x6e\x5d\xc0", 5) != 0)
     {
-      fprintf (stderr, "asn1_bit_der example roundtrip\n");
+      grub_printf ("asn1_bit_der example roundtrip\n");
       return 1;
     }
 
@@ -206,7 +205,7 @@ test_simple (void)
   if (result != ASN1_SUCCESS || ret_len != 6
       || bit_len != 18 || memcmp (str, "\x6e\x5d\xc0", 3) != 0)
     {
-      fprintf (stderr, "asn1_get_bit_der example long form\n");
+      grub_printf ("asn1_get_bit_der example long form\n");
       return 1;
     }
 
@@ -214,7 +213,7 @@ test_simple (void)
   asn1_bit_der (str, bit_len, der, &der_len);
   if (der_len != 5 || memcmp (der, "\x04\x06\x6e\x5d\xc0", 5) != 0)
     {
-      fprintf (stderr, "asn1_bit_der example roundtrip\n");
+      grub_printf ("asn1_bit_der example roundtrip\n");
       return 1;
     }
 

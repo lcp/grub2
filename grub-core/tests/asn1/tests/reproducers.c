@@ -58,8 +58,7 @@ test_reproducers (void)
   result = asn1_array2tree (endless_asn1_tab, &definitions, errorDescription);
   if (result != ASN1_SUCCESS)
     {
-      asn1_perror (result);
-      printf ("ErrorDescription = %s\n\n", errorDescription);
+      grub_printf ("Error: %s\nErrorDescription = %s\n\n", asn1_strerror (result), errorDescription);
       exit (EXIT_FAILURE);
     }
 
@@ -69,8 +68,7 @@ test_reproducers (void)
   result = asn1_array2tree (tab, &definitions, errorDescription);
   if (result != ASN1_SUCCESS)
     {
-      asn1_perror (result);
-      printf ("ErrorDescription = %s\n\n", errorDescription);
+      grub_printf ("Error: %s\nErrorDescription = %s\n\n", asn1_strerror (result), errorDescription);
       exit (EXIT_FAILURE);
     }
 
