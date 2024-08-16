@@ -116,7 +116,7 @@ test_octet_string (void)
   int str_size = sizeof (str);
   unsigned char *tmp = NULL;
   int ret, ret_len, j;
-  size_t i;
+  grub_size_t i;
 
   for (i = 0; i < sizeof (tv) / sizeof (tv[0]); i++)
     {
@@ -146,7 +146,7 @@ test_octet_string (void)
 	    }
 
 	  if (str_size != tv[i].len
-	      || memcmp (tv[i].string, str, tv[i].len) != 0)
+	      || grub_memcmp (tv[i].string, str, tv[i].len) != 0)
 	    {
 	      grub_printf ("%d: memcmp: %s: got invalid decoding\n",
 			   __LINE__, tv[i].name);
@@ -167,7 +167,7 @@ test_octet_string (void)
 	  asn1_octet_der (str, str_size, der, &der_len);
 
 	  if (der_len != tv[i].der_len - 1
-	      || memcmp (tv[i].der_str + 1, der, tv[i].der_len - 1) != 0)
+	      || grub_memcmp (tv[i].der_str + 1, der, tv[i].der_len - 1) != 0)
 	    {
 	      grub_printf ("encoding: %s: got invalid encoding\n", tv[i].name);
 	      return 1;
@@ -196,7 +196,7 @@ test_octet_string (void)
 	  return 1;
 	}
 
-      if (str_size != tv[i].len || memcmp (tv[i].string, tmp, tv[i].len) != 0)
+      if (str_size != tv[i].len || grub_memcmp (tv[i].string, tmp, tv[i].len) != 0)
 	{
 	  grub_printf ("%d: memcmp: %s: got invalid decoding\n", __LINE__, tv[i].name);
 	  grub_printf ("\nGot:\t\t");
@@ -209,7 +209,7 @@ test_octet_string (void)
 	  grub_printf ("\n");
 	  return 1;
 	}
-      free (tmp);
+      grub_free (tmp);
       tmp = NULL;
 
     }

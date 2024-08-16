@@ -43,9 +43,9 @@ test_overflow (void)
 
   /* Test that values larger than int but smaller than long are
      rejected.  This limitation was introduced with libtasn1 2.12. */
-  if (LONG_MAX > INT_MAX)
+  if (GRUB_LONG_MAX > GRUB_INT_MAX)
     {
-      unsigned long num = ((long) UINT_MAX) << 2;
+      unsigned long num = ((long) GRUB_UINT_MAX) << 2;
       unsigned char der[20];
       int der_len;
       long l;

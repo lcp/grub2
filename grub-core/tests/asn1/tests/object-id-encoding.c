@@ -104,7 +104,7 @@ test_object_id_encoding (void)
 	  return 1;
 	}
 
-      if (der_len != tv[i].der_len || memcmp (der, tv[i].der, der_len) != 0)
+      if (der_len != tv[i].der_len || grub_memcmp (der, tv[i].der, der_len) != 0)
 	{
 	  grub_printf ("%d: iter %lu, re-encoding of OID %s resulted to different string (%d vs %d bytes)\n",
 		   __LINE__, (unsigned long) i, tv[i].oid, der_len, tv[i].der_len);
