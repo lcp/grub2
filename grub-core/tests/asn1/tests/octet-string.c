@@ -108,7 +108,7 @@ static const struct tv tv[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_octet_string (void)
 {
   unsigned char str[100];
   unsigned char der[100];

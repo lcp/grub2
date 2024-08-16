@@ -80,7 +80,7 @@ static const struct tv tv[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_object_id_encoding (void)
 {
   unsigned char der[128];
   int ret, der_len, i, j;

@@ -23,7 +23,7 @@
 #include "asn1_test.h"
 
 int
-main (int argc, char **argv)
+test_overflow (void)
 {
   /* Test that values larger than long are rejected.  This has worked
      fine with all versions of libtasn1. */

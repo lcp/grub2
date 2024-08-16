@@ -70,7 +70,7 @@ static const struct tv ber[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_strings (void)
 {
   int ret;
   unsigned char tl[ASN1_MAX_TL_SIZE];
