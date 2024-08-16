@@ -70,7 +70,7 @@ static const struct tv tv[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_object_id_decoding (void)
 {
   char str[128];
   int ret, ret_len;

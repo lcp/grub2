@@ -73,7 +73,7 @@ static const struct tv tv[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_simple (void)
 {
   int result;
   unsigned char der[100];

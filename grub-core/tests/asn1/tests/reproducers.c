@@ -49,7 +49,7 @@ const asn1_static_node tab[] = {
 };
 
 int
-main (int argc, char *argv[])
+test_reproducers (void)
 {
   int result, verbose = 0;
   asn1_node definitions = NULL;
