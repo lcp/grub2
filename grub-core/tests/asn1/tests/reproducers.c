@@ -51,12 +51,9 @@ const asn1_static_node tab[] = {
 int
 test_reproducers (void)
 {
-  int result, verbose = 0;
+  int result;
   asn1_node definitions = NULL;
   char errorDescription[ASN1_MAX_ERROR_DESCRIPTION_SIZE];
-
-  if (argc > 1)
-    verbose = 1;
 
   result = asn1_array2tree (endless_asn1_tab, &definitions, errorDescription);
   if (result != ASN1_SUCCESS)
@@ -78,9 +75,6 @@ test_reproducers (void)
     }
 
   asn1_delete_structure (&definitions);
-
-  if (verbose)
-    printf ("Success\n");
 
   exit (EXIT_SUCCESS);
 }
