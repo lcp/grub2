@@ -688,7 +688,7 @@ asn1_write_value (asn1_node node_root, const char *name,
                 return ASN1_MEM_ERROR; \
         } else { \
                 /* this strcat is checked */ \
-                if (ptr) _asn1_strcat (ptr, data); \
+                if (ptr) _asn1_str_cat ((char *)ptr, ptr_size, (const char *)data); \
         }
 
 /**
