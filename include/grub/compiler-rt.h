@@ -45,6 +45,10 @@ EXPORT_FUNC (__divdi3) (grub_int64_t a, grub_int64_t b);
 grub_int64_t
 EXPORT_FUNC (__moddi3) (grub_int64_t a, grub_int64_t b);
 
+#endif
+
+#if (defined(GRUB_DIVISION_IN_SOFTWARE) && GRUB_DIVISION_IN_SOFTWARE) || defined(__mips__)
+
 grub_uint64_t
 EXPORT_FUNC (__udivdi3) (grub_uint64_t a, grub_uint64_t b);
 

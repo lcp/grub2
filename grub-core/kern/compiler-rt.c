@@ -82,20 +82,6 @@ __modsi3 (grub_int32_t a, grub_int32_t b)
   return ret;
 }
 
-grub_uint64_t
-__udivdi3 (grub_uint64_t a, grub_uint64_t b)
-{
-  return grub_divmod64 (a, b, 0);
-}
-
-grub_uint64_t
-__umoddi3 (grub_uint64_t a, grub_uint64_t b)
-{
-  grub_uint64_t ret;
-  grub_divmod64 (a, b, &ret);
-  return ret;
-}
-
 grub_int64_t
 __divdi3 (grub_int64_t a, grub_int64_t b)
 {
@@ -107,6 +93,24 @@ __moddi3 (grub_int64_t a, grub_int64_t b)
 {
   grub_int64_t ret;
   grub_divmod64s (a, b, &ret);
+  return ret;
+}
+
+#endif
+
+#if GRUB_DIVISION_IN_SOFTWARE || defined(__mips__)
+
+grub_uint64_t
+__udivdi3 (grub_uint64_t a, grub_uint64_t b)
+{
+  return grub_divmod64 (a, b, 0);
+}
+
+grub_uint64_t
+__umoddi3 (grub_uint64_t a, grub_uint64_t b)
+{
+  grub_uint64_t ret;
+  grub_divmod64 (a, b, &ret);
   return ret;
 }
 
