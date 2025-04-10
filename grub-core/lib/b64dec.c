@@ -26,7 +26,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "gpgrt-int.h"
+#include <grub/crypto.h>
+
+struct _gpgrt_b64state
+{
+  int idx;
+  int quad_count;
+  char *title;
+  unsigned char radbuf[4];
+  unsigned int crc;
+  gpg_err_code_t lasterr;
+  unsigned int flags;
+  unsigned int stop_seen:1;
+  unsigned int invalid_encoding:1;
+  unsigned int using_decoder:1;
+};
 
 
 /* The reverse base-64 list used for base-64 decoding. */
@@ -64,22 +78,22 @@ enum decoder_states
    string the decoder will skip everything until a "-----BEGIN " line
    has been seen, decoding ends at a "----END " line.  */
 gpgrt_b64state_t
-_gpgrt_b64dec_start (const char *title)
+gpgrt_b64dec_start (const char *title)
 {
   gpgrt_b64state_t state;
   char *t = NULL;
 
   if (title)
     {
-      t = xtrystrdup (title);
+      t = grub_strdup (title);
       if (!t)
         return NULL;
     }
 
-  state = xtrycalloc (1, sizeof (struct _gpgrt_b64state));
+  state = grub_calloc (1, sizeof (struct _gpgrt_b64state));
   if (!state)
     {
-      xfree (t);
+      grub_free (t);
       return NULL;
     }
 
@@ -100,7 +114,7 @@ _gpgrt_b64dec_start (const char *title)
 /* Do in-place decoding of base-64 data of LENGTH in BUFFER.  Stores the
    new length of the buffer at R_NBYTES. */
 gpg_err_code_t
-_gpgrt_b64dec_proc (gpgrt_b64state_t state, void *buffer, size_t length,
+gpgrt_b64dec_proc (gpgrt_b64state_t state, void *buffer, size_t length,
                     size_t *r_nbytes)
 {
   enum decoder_states ds = state->idx;
@@ -115,7 +129,7 @@ _gpgrt_b64dec_proc (gpgrt_b64state_t state, void *buffer, size_t length,
     {
       *r_nbytes = 0;
       state->lasterr = GPG_ERR_EOF;
-      xfree (state->title);
+      grub_free (state->title);
       state->title = NULL;
       return state->lasterr;
     }
@@ -241,7 +255,7 @@ _gpgrt_b64dec_proc (gpgrt_b64state_t state, void *buffer, size_t length,
             state->stop_seen = 1;
           break;
         default:
-          gpgrt_assert (!"invalid state");
+          grub_fatal ("invalid state");
         }
     }
 
@@ -257,7 +271,7 @@ _gpgrt_b64dec_proc (gpgrt_b64state_t state, void *buffer, size_t length,
 /* Return an error code in case an encoding error has been found
    during decoding. */
 gpg_err_code_t
-_gpgrt_b64dec_finish (gpgrt_b64state_t state)
+gpgrt_b64dec_finish (gpgrt_b64state_t state)
 {
   gpg_error_t err;
 
@@ -270,10 +284,10 @@ _gpgrt_b64dec_finish (gpgrt_b64state_t state)
     err = state->lasterr;
   else
     {
-      xfree (state->title);
+      grub_free (state->title);
       err = state->invalid_encoding? GPG_ERR_BAD_DATA : 0;
     }
-  xfree (state);
+  grub_free (state);
 
   return err;
 }
