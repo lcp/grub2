@@ -586,7 +586,13 @@ void grub_gcry_fini_all (void);
 int
 grub_get_random (void *out, grub_size_t len);
 
+#define GRUB_UTIL_MODNAME(x) .modname = x,
+#else
+#define GRUB_UTIL_MODNAME(x)
 #endif
+
+#define GRUB_BLAKE2B_BLOCK_SIZE 128
+#define GRUB_BLAKE2S_BLOCK_SIZE 64
 
 typedef struct _gpgrt_b64state *gpgrt_b64state_t;
 gpgrt_b64state_t gpgrt_b64dec_start (const char *title);
