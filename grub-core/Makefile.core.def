@@ -1695,6 +1695,14 @@ module = {
 };
 
 module = {
+  name = argon2;
+  common = lib/argon2.c;
+
+  cflags = '$(CFLAGS_GCRY)';
+  cppflags = '$(CPPFLAGS_GCRY) -I$(srcdir)/lib/libgcrypt-grub/cipher';
+};
+
+module = {
   name = relocator;
   common = lib/relocator.c;
   x86 = lib/i386/relocator16.S;

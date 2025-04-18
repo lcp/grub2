@@ -34,6 +34,7 @@ typedef enum
     GPG_ERR_BAD_MPI,
     GPG_ERR_BAD_SECKEY,
     GPG_ERR_BAD_SIGNATURE,
+    GPG_ERR_CANCELED,
     GPG_ERR_CIPHER_ALGO,
     GPG_ERR_CONFLICT,
     GPG_ERR_DECRYPT_FAILED,
@@ -507,11 +508,16 @@ grub_crypto_hmac_buffer (const struct gcry_md_spec *md,
 			 const void *key, grub_size_t keylen,
 			 const void *data, grub_size_t datalen, void *out);
 
+/*-- blake2.c --*/
+gcry_err_code_t blake2b_vl_hash (const void *in, grub_size_t inlen,
+                                 grub_size_t outputlen, void *output);
+
 extern gcry_md_spec_t _gcry_digest_spec_md5;
 extern gcry_md_spec_t _gcry_digest_spec_sha1;
 extern gcry_md_spec_t _gcry_digest_spec_sha256;
 extern gcry_md_spec_t _gcry_digest_spec_sha512;
 extern gcry_md_spec_t _gcry_digest_spec_crc32;
+extern gcry_md_spec_t _gcry_digest_spec_blake2b_512;
 extern gcry_cipher_spec_t _gcry_cipher_spec_aes;
 #define GRUB_MD_MD5 ((const gcry_md_spec_t *) &_gcry_digest_spec_md5)
 #define GRUB_MD_SHA1 ((const gcry_md_spec_t *) &_gcry_digest_spec_sha1)
