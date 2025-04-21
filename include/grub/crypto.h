@@ -539,6 +539,22 @@ grub_crypto_pbkdf2 (const struct gcry_md_spec *md,
 		    unsigned int c,
 		    grub_uint8_t *DK, grub_size_t dkLen);
 
+enum grub_gcry_kdf_subalgo_argon2
+  {
+    GRUB_GCRY_KDF_ARGON2D  = 0,
+    GRUB_GCRY_KDF_ARGON2I  = 1,
+    GRUB_GCRY_KDF_ARGON2ID = 2
+  };
+
+gcry_err_code_t
+grub_crypto_argon2 (int subalgo,
+		    const unsigned long *param, unsigned int paramlen,
+		    const void *password, grub_size_t passwordlen,
+		    const void *salt, grub_size_t saltlen,
+		    const void *key, grub_size_t keylen,
+		    const void *ad, grub_size_t adlen,
+		    grub_size_t resultlen, void *result);
+
 int
 grub_crypto_memcmp (const void *a, const void *b, grub_size_t n);
 

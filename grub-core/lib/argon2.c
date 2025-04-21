@@ -1,3 +1,7 @@
+#include "bufhelp.h"
+
+GRUB_MOD_LICENSE ("GPLv3+");
+
 typedef struct argon2_context *argon2_ctx_t;
 
 /* Per thread data for Argon2.  */
@@ -70,6 +74,24 @@ beswap64_block (u64 *dst)
 #endif
 }
 
+/* Implement _gcry_blake2b_512_hash_buffers */
+static void
+argon2_blake2b_512_hash_buffers (void *outbuf, const gcry_buffer_t *iov, int iovcnt)
+{
+  void *hd;
+
+  hd = xtrymalloc (_gcry_digest_spec_blake2b_512.contextsize);
+  if (!hd)
+    return;
+
+  _gcry_digest_spec_blake2b_512.init (hd, 0);
+  for (;iovcnt > 0; iov++, iovcnt--)
+    _gcry_digest_spec_blake2b_512.write (hd, (const char*)iov[0].data + iov[0].off, iov[0].len);
+  _gcry_digest_spec_blake2b_512.final (hd);
+  memcpy (outbuf, _gcry_digest_spec_blake2b_512.read (hd), 512 / 8);
+
+  xfree (hd);
+}
 
 static gpg_err_code_t
 argon2_fill_first_blocks (argon2_ctx_t a)
@@ -136,7 +158,10 @@ argon2_fill_first_blocks (argon2_ctx_t a)
       iov_count++;
     }
 
-  _gcry_digest_spec_blake2b_512.hash_buffers (h0_01_i, 64, iov, iov_count);
+  /* Replacement of
+   * _gcry_digest_spec_blake2b_512.hash_buffers (h0_01_i, 64, iov, iov_count);
+   */
+  argon2_blake2b_512_hash_buffers (h0_01_i, iov, iov_count);
 
   for (i = 0; i < a->lanes; i++)
     {
@@ -183,7 +208,7 @@ argon2_init (argon2_ctx_t a, unsigned int parallelism,
   block = xtrymalloc (1024 * memory_blocks);
   if (!block)
     {
-      ec = gpg_err_code_from_errno (errno);
+      ec = GPG_ERR_OUT_OF_MEMORY;
       return ec;
     }
   memset (block, 0, 1024 * memory_blocks);
@@ -191,7 +216,7 @@ argon2_init (argon2_ctx_t a, unsigned int parallelism,
   thread_data = xtrymalloc (a->lanes * sizeof (struct argon2_thread_data));
   if (!thread_data)
     {
-      ec = gpg_err_code_from_errno (errno);
+      ec = GPG_ERR_OUT_OF_MEMORY;
       xfree (block);
       return ec;
     }
@@ -344,8 +369,8 @@ argon2_compute_segment (void *priv)
   u64 address_block[1024/sizeof (u64)];
   u64 *random_block = NULL;
 
-  if (a->hash_type == GCRY_KDF_ARGON2I
-      || (a->hash_type == GCRY_KDF_ARGON2ID && t->pass == 0 && t->slice < 2))
+  if (a->hash_type == GRUB_GCRY_KDF_ARGON2I
+      || (a->hash_type == GRUB_GCRY_KDF_ARGON2ID && t->pass == 0 && t->slice < 2))
     {
       memset (input_block, 0, 1024);
       input_block[0] = t->pass;
@@ -517,9 +542,9 @@ argon2_open (gcry_kdf_hd_t *hd, int subalgo,
   gpg_err_code_t ec;
   size_t n;
 
-  if (subalgo != GCRY_KDF_ARGON2D
-      && subalgo != GCRY_KDF_ARGON2I
-      && subalgo != GCRY_KDF_ARGON2ID)
+  if (subalgo != GRUB_GCRY_KDF_ARGON2D
+      && subalgo != GRUB_GCRY_KDF_ARGON2I
+      && subalgo != GRUB_GCRY_KDF_ARGON2ID)
     return GPG_ERR_INV_VALUE;
   else
     hash_type = subalgo;
@@ -542,7 +567,7 @@ argon2_open (gcry_kdf_hd_t *hd, int subalgo,
   n = offsetof (struct argon2_context, out) + taglen;
   a = xtrymalloc (n);
   if (!a)
-    return gpg_err_code_from_errno (errno);
+    return GPG_ERR_OUT_OF_MEMORY;
 
   a->algo = GCRY_KDF_ARGON2;
   a->hash_type = hash_type;
@@ -572,4 +597,33 @@ argon2_open (gcry_kdf_hd_t *hd, int subalgo,
 
   *hd = (void *)a;
   return 0;
+}
+
+gcry_err_code_t
+grub_crypto_argon2 (int subalgo,
+		    const unsigned long *param, unsigned int paramlen,
+		    const void *password, grub_size_t passwordlen,
+		    const void *salt, grub_size_t saltlen,
+		    const void *key, grub_size_t keylen,
+		    const void *ad, grub_size_t adlen,
+		    grub_size_t resultlen, void *result)
+{
+  gcry_kdf_hd_t hd = {0};
+  gpg_err_code_t err;
+
+  if (saltlen == 0)
+    return GPG_ERR_INV_VALUE;
+
+  err = argon2_open (&hd, subalgo, param, paramlen, password, passwordlen,
+		     salt, saltlen, key, keylen, ad, adlen);
+  if (err != GPG_ERR_NO_ERROR)
+    return err;
+
+  err = argon2_compute ((argon2_ctx_t)(void *)hd, NULL);
+  if (err == GPG_ERR_NO_ERROR)
+    err = argon2_final ((argon2_ctx_t)(void *)hd, resultlen, result);
+
+  argon2_close ((argon2_ctx_t)(void *)hd);
+
+  return err;
 }
