@@ -67,7 +67,7 @@ luksfile=${tpm2testdir}/luks.disk
 lukskeyfile=${tpm2testdir}/password.txt
 
 # Choose a low iteration number to reduce the time to decrypt the disk
-csopt="--type luks2 --pbkdf pbkdf2 --iter-time 1000"
+csopt="--type luks2 --pbkdf argon2id"
 
 tpm2statedir=${tpm2testdir}/tpm
 tpm2ctrl=${tpm2statedir}/ctrl
@@ -75,7 +75,7 @@ tpm2log=${tpm2statedir}/logfile
 
 sealedkey=${tpm2testdir}/sealed.tpm
 
-timeout=20
+timeout=40
 
 testoutput=${tpm2testdir}/testoutput
 

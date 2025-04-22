@@ -293,8 +293,9 @@ program = {
 
   ldadd = '$(LIBLZMA)';
   ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
+  ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
 };
