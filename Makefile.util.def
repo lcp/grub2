@@ -181,6 +181,14 @@ library = {
   common = grub-core/lib/zstd/zstd_decompress.c;
 };
 
+library = {
+  name = libgrubargon2.a;
+  common = grub-core/lib/argon2.c;
+
+  cflags = '$(CFLAGS_GCRY)';
+  cppflags = '$(CPPFLAGS_GCRY) -I$(srcdir)/grub-core/lib/libgcrypt-grub/cipher';
+};
+
 program = {
   name = grub-mkimage;
   mansection = 1;
@@ -225,8 +233,9 @@ program = {
   cflags = '-I$(srcdir)/grub-core/lib/tss2 -I$(srcdir)/grub-core/commands/tpm2_key_protector';
 
   ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
+  ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBTASN1)';
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
@@ -323,8 +332,9 @@ program = {
   common = grub-core/osdep/init.c;
 
   ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
+  ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
 };
@@ -378,8 +388,9 @@ program = {
   common = grub-core/osdep/init.c;
 
   ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
+  ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
 };
@@ -401,6 +412,7 @@ program = {
 
   ldadd = libgrubmods.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
   ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
@@ -421,6 +433,7 @@ program = {
 
   ldadd = libgrubmods.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
   ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
@@ -466,8 +479,9 @@ program = {
   common = grub-core/kern/emu/argp_common.c;
 
   ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
+  ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
 };
@@ -605,8 +619,9 @@ program = {
 
   ldadd = '$(LIBLZMA)';
   ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
+  ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
 
@@ -691,8 +706,9 @@ program = {
 
   ldadd = '$(LIBLZMA)';
   ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
+  ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBUTIL) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
 };
@@ -1400,8 +1416,9 @@ program = {
   common = grub-core/kern/emu/argp_common.c;
 
   ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
+  ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
 };
@@ -1434,8 +1451,9 @@ program = {
   common = grub-core/osdep/init.c;
 
   ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
+  ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
 };
@@ -1463,8 +1481,9 @@ program = {
   common = grub-core/osdep/init.c;
 
   ldadd = libgrubmods.a;
-  ldadd = libgrubgcry.a;
   ldadd = libgrubkern.a;
+  ldadd = libgrubargon2.a;
+  ldadd = libgrubgcry.a;
   ldadd = grub-core/lib/gnulib/libgnu.a;
   ldadd = '$(LIBINTL) $(LIBDEVMAPPER) $(LIBZFS) $(LIBNVPAIR) $(LIBGEOM)';
 };
