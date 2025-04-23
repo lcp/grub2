@@ -1,23 +1,32 @@
+#include <grub/test.h>
+#include <grub/dl.h>
+#include <grub/misc.h>
+#include <grub/crypto.h>
+
+GRUB_MOD_LICENSE ("GPLv3+");
+
+#define DIM(v) (sizeof(v)/sizeof((v)[0]))
+
 static void
-check_argon2 (void)
+argon2_test (void)
 {
   gcry_error_t err;
   static struct {
     int subalgo;
     unsigned long param[4];
-    size_t passlen;
+    grub_size_t passlen;
     const char *pass;
-    size_t saltlen;
+    grub_size_t saltlen;
     const char *salt;
-    size_t keylen;
+    grub_size_t keylen;
     const char *key;
-    size_t adlen;
+    grub_size_t adlen;
     const char *ad;
-    size_t dklen;
+    grub_size_t dklen;
     const char *dk;
   } tv[] = {
     {
-      GCRY_KDF_ARGON2D,
+      GRUB_GCRY_KDF_ARGON2D,
       { 32, 3, 32, 4 },
       32,
       "\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"
@@ -33,7 +42,7 @@ check_argon2 (void)
       "\xf8\x68\xe3\xbe\x39\x84\xf3\xc1\xa1\x3a\x4d\xb9\xfa\xbe\x4a\xcb"
     },
     {
-      GCRY_KDF_ARGON2I,
+      GRUB_GCRY_KDF_ARGON2I,
       { 32, 3, 32, 4 },
       32,
       "\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"
@@ -49,7 +58,7 @@ check_argon2 (void)
       "\xc8\xde\x6b\x01\x6d\xd3\x88\xd2\x99\x52\xa4\xc4\x67\x2b\x6c\xe8"
     },
     {
-      GCRY_KDF_ARGON2ID,
+      GRUB_GCRY_KDF_ARGON2ID,
       { 32, 3, 32, 4 },
       32,
       "\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01"
@@ -66,7 +75,7 @@ check_argon2 (void)
     },
     {
       /* empty password */
-      GCRY_KDF_ARGON2I,
+      GRUB_GCRY_KDF_ARGON2I,
       { 32, 3, 128, 1 },
       0, NULL,
       16,
@@ -79,7 +88,7 @@ check_argon2 (void)
     },
     {
       /* empty password */
-      GCRY_KDF_ARGON2ID,
+      GRUB_GCRY_KDF_ARGON2ID,
       { 32, 3, 128, 1 },
       0, NULL,
       16,
@@ -92,50 +101,21 @@ check_argon2 (void)
     },
   };
   unsigned char out[32];
-  int i;
-  int count;
+  unsigned int count;
 
   for (count = 0; count < DIM(tv); count++)
     {
-      if (verbose)
-        fprintf (stderr, "checking ARGON2 test vector %d\n", count);
-
-      err = my_kdf_derive (0, GCRY_KDF_ARGON2,
-                           tv[count].subalgo, tv[count].param, 4,
-                           tv[count].pass, tv[count].passlen,
-                           tv[count].salt, tv[count].saltlen,
-                           tv[count].key, tv[count].keylen,
-                           tv[count].ad, tv[count].adlen,
-                           tv[count].dklen, out);
-      if (err)
-        fail ("argon2 test %d failed: %s\n", count*2+0, gpg_strerror (err));
-      else if (memcmp (out, tv[count].dk, tv[count].dklen))
-        {
-          fail ("argon2 test %d failed: mismatch\n", count*2+0);
-          fputs ("got:", stderr);
-          for (i=0; i < tv[count].dklen; i++)
-            fprintf (stderr, " %02x", out[i]);
-          putc ('\n', stderr);
-        }
-
-#ifdef HAVE_PTHREAD
-      err = my_kdf_derive (1, GCRY_KDF_ARGON2,
-                           tv[count].subalgo, tv[count].param, 4,
-                           tv[count].pass, tv[count].passlen,
-                           tv[count].salt, tv[count].saltlen,
-                           tv[count].key, tv[count].keylen,
-                           tv[count].ad, tv[count].adlen,
-                           tv[count].dklen, out);
-      if (err)
-        fail ("argon2 test %d failed: %s\n", count*2+1, gpg_strerror (err));
-      else if (memcmp (out, tv[count].dk, tv[count].dklen))
-        {
-          fail ("argon2 test %d failed: mismatch\n", count*2+1);
-          fputs ("got:", stderr);
-          for (i=0; i < tv[count].dklen; i++)
-            fprintf (stderr, " %02x", out[i]);
-          putc ('\n', stderr);
-        }
-#endif
+      err = grub_crypto_argon2 (tv[count].subalgo,
+				tv[count].param, 4,
+				tv[count].pass, tv[count].passlen,
+				tv[count].salt, tv[count].saltlen,
+				tv[count].key, tv[count].keylen,
+				tv[count].ad, tv[count].adlen,
+				tv[count].dklen, out);
+      grub_test_assert (err == 0, "argon2 test %d failed: %d", count, err);
+      grub_test_assert (grub_memcmp (out, tv[count].dk, tv[count].dklen) == 0,
+			"argon2 test %d failed: mismatch", count);
     }
 }
+
+GRUB_FUNCTIONAL_TEST (argon2_test, argon2_test);
