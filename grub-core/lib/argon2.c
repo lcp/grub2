@@ -318,6 +318,7 @@ index_alpha (argon2_ctx_t a, const struct argon2_thread_data *t,
   u32 reference_area_size;
   u64 relative_position;
   u32 start_position;
+  u64 remainder;
 
   if (t->pass == 0)
     {
@@ -354,7 +355,8 @@ index_alpha (argon2_ctx_t a, const struct argon2_thread_data *t,
       ? 0
       : (t->slice + 1) * a->segment_length;
 
-  return (start_position + relative_position) % a->lane_length;
+  grub_divmod64 (start_position + relative_position, a->lane_length, &remainder);
+  return remainder;
 }
 
 static void
@@ -368,6 +370,7 @@ argon2_compute_segment (void *priv)
   u64 input_block[1024/sizeof (u64)];
   u64 address_block[1024/sizeof (u64)];
   u64 *random_block = NULL;
+  u64 remainder;
 
   if (a->hash_type == GRUB_GCRY_KDF_ARGON2I
       || (a->hash_type == GRUB_GCRY_KDF_ARGON2ID && t->pass == 0 && t->slice < 2))
@@ -392,7 +395,8 @@ argon2_compute_segment (void *priv)
     i = 0;
 
   curr_offset = t->lane * a->lane_length + t->slice * a->segment_length + i;
-  if ((curr_offset % a->lane_length))
+  grub_divmod64 (curr_offset, a->lane_length, &remainder);
+  if (remainder)
     prev_offset = curr_offset - 1;
   else
     prev_offset = curr_offset + a->lane_length - 1;
@@ -402,7 +406,8 @@ argon2_compute_segment (void *priv)
       u64 *ref_block, *curr_block;
       u64 rand64;
 
-      if ((curr_offset % a->lane_length) == 1)
+      grub_divmod64 (curr_offset, a->lane_length, &remainder);
+      if (remainder == 1)
         prev_offset = curr_offset - 1;
 
       if (random_block)
@@ -418,7 +423,10 @@ argon2_compute_segment (void *priv)
       if (t->pass == 0 && t->slice == 0)
         ref_lane = t->lane;
       else
-        ref_lane = (rand64 >> 32) % a->lanes;
+	{
+	  grub_divmod64 (rand64 >> 32, a->lanes, &remainder);
+	  ref_lane = remainder;
+	}
 
       ref_index = index_alpha (a, t, i, (rand64 & 0xffffffff),
                                ref_lane == t->lane);
