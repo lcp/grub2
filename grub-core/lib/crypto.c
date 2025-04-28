@@ -564,9 +564,16 @@ grub_crypto_hmac_buffer (const struct gcry_md_spec *md,
 grub_err_t
 grub_crypto_gcry_error (gcry_err_code_t in)
 {
-  if (in == GPG_ERR_NO_ERROR)
+  switch (in) {
+  case GPG_ERR_NO_ERROR:
     return GRUB_ERR_NONE;
-  return GRUB_ACCESS_DENIED;
+  case GPG_ERR_OUT_OF_MEMORY:
+    return GRUB_ERR_OUT_OF_MEMORY;
+  case GPG_ERR_INV_VALUE:
+    return GRUB_ERR_BAD_NUMBER;
+  default:
+    return GRUB_ACCESS_DENIED;
+  }
 }
 
 
