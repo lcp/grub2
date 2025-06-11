@@ -585,10 +585,14 @@ unsigned int
 _gcry_ct_not_memequal (const void *b1, const void *b2, grub_size_t len);
 
 
+#ifdef GRUB_UTIL
 static inline unsigned int _gcry_get_hw_features(void)
 {
   return 0;
 }
+#else
+extern unsigned int _gcry_get_hw_features(void);
+#endif
 
 void *_gcry_malloc(grub_size_t n);
 void *_gcry_malloc_secure(grub_size_t n);
