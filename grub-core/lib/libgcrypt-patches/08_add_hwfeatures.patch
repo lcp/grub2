@@ -1,0 +1,51 @@
+From 146823bd16958d6b8380c79b6ec88b89b633f0ee Mon Sep 17 00:00:00 2001
+From: Gary Lin <glin@suse.com>
+Date: Fri, 18 Jul 2025 15:21:51 +0800
+Subject: [PATCH 1/2] libgcrypt-grub: implement _gcry_get_hw_features()
+
+Implement _gcry_get_hw_features() with the hardware features detection
+function from libgcryt.
+
+Signed-off-by: Gary Lin <glin@suse.com>
+---
+ grub-core/lib/libgcrypt-grub/src/hwfeatures.c | 28 +++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+ create mode 100644 grub-core/lib/libgcrypt-grub/src/hwfeatures.c
+
+diff --git a/grub-core/lib/libgcrypt-grub/src/hwfeatures.c b/grub-core/lib/libgcrypt-grub/src/hwfeatures.c
+new file mode 100644
+index 000000000..33e754a2e
+--- /dev/null
++++ b/grub-core/lib/libgcrypt-grub/src/hwfeatures.c
+@@ -0,0 +1,28 @@
++#include <config.h>
++#include <stdio.h>
++#include <ctype.h>
++#include <stdlib.h>
++#include <string.h>
++#include <stdarg.h>
++#include <unistd.h>
++
++#include "g10lib.h"
++#include "hwf-common.h"
++
++unsigned int
++_gcry_get_hw_features(void)
++{
++  static bool detected;
++  static unsigned int hw_features;
++
++  if (detected == true)
++    return hw_features;
++
++#if defined(__x86_64__)
++  hw_features = _gcry_hwf_detect_x86();
++#endif
++
++  detected = true;
++
++  return hw_features;
++}
+-- 
+2.43.0
+
