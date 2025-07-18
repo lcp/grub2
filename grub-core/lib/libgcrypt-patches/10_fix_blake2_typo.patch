@@ -1,0 +1,28 @@
+From a7bb0c84ca7f14e25fa4781bff1cdedbc1d20510 Mon Sep 17 00:00:00 2001
+From: Gary Lin <glin@suse.com>
+Date: Fri, 18 Jul 2025 15:32:13 +0800
+Subject: [PATCH 1/2] libgcrypt-grub: fix a typo in blake2.c
+
+Fix the typo: USE_AVX -> USE_AVX512
+
+Signed-off-by: Gary Lin <glin@suse.com>
+---
+ grub-core/lib/libgcrypt-grub/cipher/blake2.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/grub-core/lib/libgcrypt-grub/cipher/blake2.c b/grub-core/lib/libgcrypt-grub/cipher/blake2.c
+index 2829fce73..47f5b3c1f 100644
+--- a/grub-core/lib/libgcrypt-grub/cipher/blake2.c
++++ b/grub-core/lib/libgcrypt-grub/cipher/blake2.c
+@@ -832,7 +832,7 @@ static gcry_err_code_t blake2s_init_ctx(void *ctx, unsigned int flags,
+ #ifdef USE_AVX
+   c->use_avx = !!(features & HWF_INTEL_AVX);
+ #endif
+-#ifdef USE_AVX
++#ifdef USE_AVX512
+   c->use_avx512 = !!(features & HWF_INTEL_AVX512);
+ #endif
+ 
+-- 
+2.43.0
+
